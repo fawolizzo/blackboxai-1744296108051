@@ -1,0 +1,16 @@
+# System Files
+.DS_Store
+Thumbs.db
+
+# IDE/Editor Folders
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs
+*.log
+
+# Environment Variables
+.env
+.env.local
