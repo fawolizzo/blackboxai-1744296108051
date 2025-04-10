@@ -131,7 +131,6 @@ addLogBtn.addEventListener('click', () => {
     }
 });
 
-// Add new log entry
 function addLogEntry(text, skipDuplicateCheck = false) {
     // Check for duplicate entries if not explicitly skipped
     if (!skipDuplicateCheck) {
@@ -140,6 +139,31 @@ function addLogEntry(text, skipDuplicateCheck = false) {
             return; // Skip duplicate entries
         }
     }
+    
+    const newLog = {
+        timestamp: new Date().toLocaleString(),
+        text: text
+    };
+    userData.logs.unshift(newLog);
+    
+    // Create new log element
+    const logDiv = document.createElement('div');
+    logDiv.className = 'border-l-4 border-green-500 pl-4 p-3 hover:bg-gray-50 rounded-lg transition';
+    logDiv.innerHTML = `
+        <p class="text-sm text-gray-600">${newLog.timestamp}</p>
+        <p>${text}</p>
+    `;
+    
+    // Insert before the first child of logsContainer
+    if (logsContainer.firstChild) {
+        logsContainer.insertBefore(logDiv, logsContainer.firstChild);
+    } else {
+        logsContainer.appendChild(logDiv);
+    }
+    
+    // Save data to local storage
+    saveData();
+}
 
     const newLog = {
         timestamp: new Date().toLocaleString(),
