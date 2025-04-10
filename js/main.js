@@ -66,9 +66,12 @@ function initializeTasks() {
     userData.tasks.forEach((task, index) => {
         const taskDiv = document.createElement('div');
         taskDiv.className = 'task-item';
+        if (task.completed) {
+            taskDiv.classList.add('task-completed');
+        }
         taskDiv.innerHTML = `
             <label class="task-label">
-                <input type="checkbox" class="task-checkbox" data-duration="${task.duration}">
+                <input type="checkbox" class="task-checkbox" data-duration="${task.duration}" ${task.completed ? 'checked' : ''}>
                 <span class="ml-3">${task.text} (${formatDuration(task.duration)})</span>
             </label>
         `;
@@ -162,29 +165,6 @@ function addLogEntry(text, skipDuplicateCheck = false) {
     }
     
     // Save data to local storage
-    saveData();
-}
-
-    const newLog = {
-        timestamp: new Date().toLocaleString(),
-        text: text
-    };
-    userData.logs.unshift(newLog);
-    
-    // Create new log element
-    const logDiv = document.createElement('div');
-    logDiv.className = 'border-l-4 border-green-500 pl-4 p-3 hover:bg-gray-50 rounded-lg transition';
-    logDiv.innerHTML = `
-        <p class="text-sm text-gray-600">${newLog.timestamp}</p>
-        <p>${text}</p>
-    `;
-    
-    // Insert before the first child of logsContainer
-    if (logsContainer.firstChild) {
-        logsContainer.insertBefore(logDiv, logsContainer.firstChild);
-    } else {
-        logsContainer.appendChild(logDiv);
-    }
     saveData();
 }
 
@@ -399,8 +379,48 @@ function loadData() {
         // Update UI with loaded data
         updateUI();
         updateProgressChart();
+        // Restore tasks with their completed state
+        restoreTasks();
+        // Restore logs
+        restoreLogs();
+    } else {
+        initializeTasks();
     }
-    initializeTasks();
+}
+
+// Function to restore tasks with their completed state
+function restoreTasks() {
+    tasksContainer.innerHTML = '';
+    userData.tasks.forEach((task, index) => {
+        const taskDiv = document.createElement('div');
+        taskDiv.className = 'task-item';
+        if (task.completed) {
+            taskDiv.classList.add('task-completed');
+        }
+        taskDiv.innerHTML = `
+            <label class="task-label">
+                <input type="checkbox" class="task-checkbox" data-duration="${task.duration}" ${task.completed ? 'checked' : ''}>
+                <span class="ml-3">${task.text} (${formatDuration(task.duration)})</span>
+            </label>
+        `;
+        tasksContainer.appendChild(taskDiv);
+    });
+    setupCheckboxListeners();
+    updateDailyProgress();
+}
+
+// Function to restore logs
+function restoreLogs() {
+    logsContainer.innerHTML = '';
+    userData.logs.forEach(log => {
+        const logDiv = document.createElement('div');
+        logDiv.className = 'border-l-4 border-green-500 pl-4 p-3 hover:bg-gray-50 rounded-lg transition';
+        logDiv.innerHTML = `
+            <p class="text-sm text-gray-600">${log.timestamp}</p>
+            <p>${log.text}</p>
+        `;
+        logsContainer.appendChild(logDiv);
+    });
 }
 
 // Update UI with current data
