@@ -102,7 +102,8 @@ function addTask(text, duration) {
         id: userData.tasks.length + 1,
         text: text,
         completed: false,
-        duration: duration
+        duration: duration,
+        date: getToday()
     };
     userData.tasks.push(newTask);
     
@@ -143,9 +144,12 @@ function addLogEntry(text, skipDuplicateCheck = false) {
         }
     }
     
+    const now = new Date();
     const newLog = {
-        timestamp: new Date().toLocaleString(),
-        text: text
+        timestamp: now.toLocaleString(),
+        date: now.toLocaleDateString(),
+        text: text,
+        time: now.toLocaleTimeString()
     };
     userData.logs.unshift(newLog);
     
@@ -376,12 +380,19 @@ function loadData() {
     const saved = localStorage.getItem('chessTracker');
     if (saved) {
         userData = JSON.parse(saved);
+        
+        // Clear tasks from previous days
+        const today = getToday();
+        userData.tasks = userData.tasks.filter(task => task.date === today);
+        
         // Update UI with loaded data
         updateUI();
         updateProgressChart();
+        
         // Restore tasks with their completed state
         restoreTasks();
-        // Restore logs
+        
+        // Restore logs with dates
         restoreLogs();
     } else {
         initializeTasks();
@@ -412,15 +423,38 @@ function restoreTasks() {
 // Function to restore logs
 function restoreLogs() {
     logsContainer.innerHTML = '';
+    
+    // Group logs by date
+    const logsByDate = {};
     userData.logs.forEach(log => {
-        const logDiv = document.createElement('div');
-        logDiv.className = 'border-l-4 border-green-500 pl-4 p-3 hover:bg-gray-50 rounded-lg transition';
-        logDiv.innerHTML = `
-            <p class="text-sm text-gray-600">${log.timestamp}</p>
-            <p>${log.text}</p>
-        `;
-        logsContainer.appendChild(logDiv);
+        const date = log.date || new Date(log.timestamp).toLocaleDateString();
+        if (!logsByDate[date]) {
+            logsByDate[date] = [];
+        }
+        logsByDate[date].push(log);
     });
+    
+    // Create date sections for logs
+    Object.keys(logsByDate)
+        .sort((a, b) => new Date(b) - new Date(a))
+        .forEach(date => {
+            // Add date header
+            const dateHeader = document.createElement('div');
+            dateHeader.className = 'text-lg font-semibold text-blue-600 mb-4 mt-6 border-b pb-2';
+            dateHeader.textContent = date === new Date().toLocaleDateString() ? 'Today' : date;
+            logsContainer.appendChild(dateHeader);
+            
+            // Add logs for this date
+            logsByDate[date].forEach(log => {
+                const logDiv = document.createElement('div');
+                logDiv.className = 'border-l-4 border-green-500 pl-4 p-3 hover:bg-gray-50 rounded-lg transition mb-2';
+                logDiv.innerHTML = `
+                    <p class="text-sm text-gray-600">${log.time || new Date(log.timestamp).toLocaleTimeString()}</p>
+                    <p>${log.text}</p>
+                `;
+                logsContainer.appendChild(logDiv);
+            });
+        });
 }
 
 // Update UI with current data
