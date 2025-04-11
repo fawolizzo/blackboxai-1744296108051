@@ -189,12 +189,8 @@ function handleTaskCompletion(checkbox, index) {
         task.completed = false;
     }
 
-    // Recalculate total hours trained from completed tasks
-    userData.hoursTrained = userData.tasks.reduce((total, task) => {
-        return total + (task.completed ? task.duration : 0);
-    }, 0);
-
-    // Update progress immediately
+    // Update total hours and progress
+    updateTotalHours();
     updateProgress();
     updateDailyProgress();
     saveData();
@@ -381,9 +377,15 @@ function loadData() {
     if (saved) {
         userData = JSON.parse(saved);
         
-        // Clear tasks from previous days
-        const today = getToday();
-        userData.tasks = userData.tasks.filter(task => task.date === today);
+        // Ensure all tasks have dates
+        userData.tasks.forEach(task => {
+            if (!task.date) {
+                task.date = getToday();
+            }
+        });
+        
+        // Update total hours
+        updateTotalHours();
         
         // Update UI with loaded data
         updateUI();
@@ -429,9 +431,21 @@ function calculateDailyHours(tasks, date) {
 
 // Calculate total hours across all days
 function calculateTotalHours() {
-    return userData.tasks
-        .filter(task => task.completed)
-        .reduce((total, task) => total + task.duration, 0);
+    // Get unique dates from tasks
+    const dates = [...new Set(userData.tasks.map(task => task.date))];
+    
+    // Sum up hours for each date
+    return dates.reduce((total, date) => {
+        const dailyHours = calculateDailyHours(userData.tasks, date);
+        return total + dailyHours;
+    }, 0);
+}
+
+// Update total hours in userData
+function updateTotalHours() {
+    const total = calculateTotalHours();
+    userData.hoursTrained = total;
+    saveData();
 }
 
 // Function to restore logs
