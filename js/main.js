@@ -420,6 +420,20 @@ function restoreTasks() {
     updateDailyProgress();
 }
 
+// Calculate total hours for a specific date
+function calculateDailyHours(tasks, date) {
+    return tasks
+        .filter(task => task.date === date && task.completed)
+        .reduce((total, task) => total + task.duration, 0);
+}
+
+// Calculate total hours across all days
+function calculateTotalHours() {
+    return userData.tasks
+        .filter(task => task.completed)
+        .reduce((total, task) => total + task.duration, 0);
+}
+
 // Function to restore logs
 function restoreLogs() {
     logsContainer.innerHTML = '';
@@ -438,10 +452,16 @@ function restoreLogs() {
     Object.keys(logsByDate)
         .sort((a, b) => new Date(b) - new Date(a))
         .forEach(date => {
-            // Add date header
+            // Calculate daily hours
+            const dailyHours = calculateDailyHours(userData.tasks, date);
+            
+            // Add date header with hours
             const dateHeader = document.createElement('div');
-            dateHeader.className = 'text-lg font-semibold text-blue-600 mb-4 mt-6 border-b pb-2';
-            dateHeader.textContent = date === new Date().toLocaleDateString() ? 'Today' : date;
+            dateHeader.className = 'text-lg font-semibold text-blue-600 mb-4 mt-6 border-b pb-2 flex justify-between items-center';
+            dateHeader.innerHTML = `
+                <span>${date === new Date().toLocaleDateString() ? 'Today' : date}</span>
+                <span class="text-sm text-gray-600">Hours: ${formatDuration(dailyHours)}</span>
+            `;
             logsContainer.appendChild(dateHeader);
             
             // Add logs for this date
@@ -463,10 +483,13 @@ function updateUI() {
     document.querySelector('h2').textContent = `Welcome, ${userData.name}!`;
     document.querySelector('p').textContent = `Rating: ${userData.rating} • Goal: ${userData.goal}`;
     
+    // Calculate total hours
+    const totalHours = calculateTotalHours();
+    
     // Update statistics
     document.querySelectorAll('.streak-count').forEach(el => el.textContent = userData.streak);
     document.querySelector('.completion-rate').textContent = `${userData.completionRate}%`;
-    document.querySelectorAll('.hours-trained').forEach(el => el.textContent = formatDuration(userData.hoursTrained));
+    document.querySelectorAll('.hours-trained').forEach(el => el.textContent = formatDuration(totalHours));
 }
 
 // Reset Training Plan
