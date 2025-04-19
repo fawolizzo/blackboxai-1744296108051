@@ -135,7 +135,8 @@ function startTimer(taskId) {
     }
     activeTaskId = taskId;
     const task = userData.tasks.find(t => t.id === taskId);
-    timerRemaining = Math.floor(task.duration * 60);
+    // Fix: convert duration in hours to seconds (hours * 3600)
+    timerRemaining = Math.floor(task.duration * 3600);
     timerPaused = false;
     updateTimerDisplay(taskId);
     updateTimerButtons(taskId);
@@ -261,6 +262,7 @@ function addTask(text, duration) {
             <button id="pause-btn-${newTask.id}" class="pause-btn bg-yellow-500 text-white px-2 py-1 rounded hover:bg-yellow-600 hidden" data-task-id="${newTask.id}">Pause</button>
             <button id="resume-btn-${newTask.id}" class="resume-btn bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600 hidden" data-task-id="${newTask.id}">Resume</button>
         </div>
+    </div>
     `;
     
     tasksContainer.appendChild(taskDiv);
@@ -278,7 +280,8 @@ function completeTask(taskId) {
         updateDailyProgress();
         saveData();
         restoreTasks();
-        addLogEntry(`Completed: ${userData.tasks[taskIndex].text}`);
+        // Include planned duration in log entry
+        addLogEntry(`Completed: ${userData.tasks[taskIndex].text} (${formatDuration(userData.tasks[taskIndex].duration)})`);
         activeTaskId = null;
         timerInterval = null;
         timerRemaining = 0;
@@ -301,9 +304,11 @@ function restoreTasks() {
             </label>
             <div class="timer-controls flex items-center space-x-2 ml-4">
                 <span id="timer-${task.id}" class="font-mono text-sm text-blue-600">00:00</span>
+                ${task.completed ? '' : `
                 <button id="start-btn-${task.id}" class="start-btn bg-green-500 text-white px-2 py-1 rounded hover:bg-green-600" data-task-id="${task.id}">Start</button>
                 <button id="pause-btn-${task.id}" class="pause-btn bg-yellow-500 text-white px-2 py-1 rounded hover:bg-yellow-600 hidden" data-task-id="${task.id}">Pause</button>
                 <button id="resume-btn-${task.id}" class="resume-btn bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600 hidden" data-task-id="${task.id}">Resume</button>
+                `}
             </div>
         `;
         tasksContainer.appendChild(taskDiv);
