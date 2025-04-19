@@ -17,7 +17,7 @@ resetBtn.innerHTML = '<i class="fas fa-trash-alt mr-2"></i>Reset Training Plan';
 // Add Reset button after Add Task button
 document.querySelector('.buttons-container').appendChild(resetBtn);
 
-// Sample user data
+// Sample user data (initial state)
 let userData = {
     name: 'Player',
     rating: 1500,
@@ -29,6 +29,87 @@ let userData = {
     logs: [],
     dailyProgress: []
 };
+
+// Data persistence functions
+function saveData() {
+    localStorage.setItem('chessTracker', JSON.stringify(userData));
+}
+
+function loadData() {
+    const saved = localStorage.getItem('chessTracker');
+    if (saved) {
+        userData = JSON.parse(saved);
+        
+        // Ensure all tasks have dates
+        userData.tasks.forEach(task => {
+            if (!task.date) {
+                task.date = getToday();
+            }
+        });
+        
+        // Update total hours
+        updateTotalHours();
+        
+        // Update UI with loaded data
+        updateUI();
+        updateProgressChart();
+        
+        // Restore tasks with their completed state
+        restoreTasks();
+        
+        // Restore logs with dates
+        restoreLogs();
+    } else {
+        initializeTasks();
+    }
+}
+
+// Function to initialize tasks
+function initializeTasks() {
+    userData = {
+        name: 'Player',
+        rating: 1500,
+        goal: 1800,
+        streak: 0,
+        completionRate: 0,
+        hoursTrained: 0,
+        tasks: [],
+        logs: [],
+        dailyProgress: []
+    };
+    updateUI();
+    saveData();
+}
+
+// Load data from local storage
+function loadData() {
+    const saved = localStorage.getItem('chessTracker');
+    if (saved) {
+        userData = JSON.parse(saved);
+        
+        // Ensure all tasks have dates
+        userData.tasks.forEach(task => {
+            if (!task.date) {
+                task.date = getToday();
+            }
+        });
+        
+        // Update total hours
+        updateTotalHours();
+        
+        // Update UI with loaded data
+        updateUI();
+        updateProgressChart();
+        
+        // Restore tasks with their completed state
+        restoreTasks();
+        
+        // Restore logs with dates
+        restoreLogs();
+    } else {
+        initializeTasks();
+    }
+}
 
 // Function to convert hours and minutes to hours
 function convertToHours(hours, minutes) {
@@ -83,6 +164,7 @@ function startTimer(taskId) {
     timerRemaining = Math.floor(task.duration * 60);
     timerPaused = false;
     updateTimerDisplay(taskId);
+    updateTimerButtons(taskId);
     timerInterval = setInterval(() => {
         if (!timerPaused) {
             timerRemaining--;
@@ -90,6 +172,7 @@ function startTimer(taskId) {
             if (timerRemaining <= 0) {
                 clearInterval(timerInterval);
                 completeTask(taskId);
+                updateTimerButtons(null);
             }
         }
     }, 1000);
@@ -98,11 +181,13 @@ function startTimer(taskId) {
 // Function to pause timer
 function pauseTimer() {
     timerPaused = true;
+    updateTimerButtons(activeTaskId);
 }
 
 // Function to resume timer
 function resumeTimer() {
     timerPaused = false;
+    updateTimerButtons(activeTaskId);
 }
 
 // Function to update timer display in UI
@@ -111,6 +196,32 @@ function updateTimerDisplay(taskId) {
     if (timerSpan) {
         timerSpan.textContent = formatTime(timerRemaining);
     }
+}
+
+// Function to update timer buttons in UI
+function updateTimerButtons(taskId) {
+    userData.tasks.forEach(task => {
+        const startBtn = document.querySelector(`#start-btn-${task.id}`);
+        const pauseBtn = document.querySelector(`#pause-btn-${task.id}`);
+        const resumeBtn = document.querySelector(`#resume-btn-${task.id}`);
+        if (!startBtn || !pauseBtn || !resumeBtn) return;
+
+        if (task.id === taskId) {
+            if (timerPaused) {
+                startBtn.style.display = 'none';
+                pauseBtn.style.display = 'none';
+                resumeBtn.style.display = 'inline-block';
+            } else {
+                startBtn.style.display = 'none';
+                pauseBtn.style.display = 'inline-block';
+                resumeBtn.style.display = 'none';
+            }
+        } else {
+            startBtn.style.display = 'inline-block';
+            pauseBtn.style.display = 'none';
+            resumeBtn.style.display = 'none';
+        }
+    });
 }
 
 // Function to complete task when timer ends
@@ -130,21 +241,26 @@ function completeTask(taskId) {
     }
 }
 
-// Event delegation for task clicks to start/pause/resume timer
+// Event delegation for task clicks to prevent timer start/pause/resume on label click
 tasksContainer.addEventListener('click', (e) => {
-    const taskLabel = e.target.closest('.task-label');
-    if (!taskLabel) return;
-    const taskDiv = taskLabel.closest('.task-item');
-    if (!taskDiv) return;
-    const taskId = parseInt(taskDiv.querySelector('input[type="checkbox"]').dataset.taskId);
-    if (activeTaskId === taskId) {
-        if (timerPaused) {
-            resumeTimer();
-        } else {
-            pauseTimer();
-        }
-    } else {
+    if (e.target.tagName === 'INPUT' && e.target.type === 'checkbox') {
+        // Checkbox clicked, handle task completion
+        return;
+    }
+    if (e.target.closest('.task-label')) {
+        e.preventDefault();
+    }
+});
+
+// Event delegation for timer button clicks
+tasksContainer.addEventListener('click', (e) => {
+    if (e.target.classList.contains('start-btn')) {
+        const taskId = parseInt(e.target.dataset.taskId);
         startTimer(taskId);
+    } else if (e.target.classList.contains('pause-btn')) {
+        pauseTimer();
+    } else if (e.target.classList.contains('resume-btn')) {
+        resumeTimer();
     }
 });
 
@@ -176,13 +292,18 @@ function addTask(text, duration) {
     
     // Create new task element
     const taskDiv = document.createElement('div');
-    taskDiv.className = 'task-item';
+    taskDiv.className = 'task-item flex items-center justify-between';
     taskDiv.innerHTML = `
-        <label class="task-label">
+        <label class="task-label flex items-center flex-grow cursor-pointer">
             <input type="checkbox" class="task-checkbox" data-duration="${duration}" data-task-id="${newTask.id}">
             <span class="ml-3">${text} (${formatDuration(duration)})</span>
-            <span id="timer-${newTask.id}" class="ml-4 font-mono text-sm text-blue-600">00:00</span>
         </label>
+        <div class="timer-controls flex items-center space-x-2 ml-4">
+            <span id="timer-${newTask.id}" class="font-mono text-sm text-blue-600">00:00</span>
+            <button id="start-btn-${newTask.id}" class="start-btn bg-green-500 text-white px-2 py-1 rounded hover:bg-green-600" data-task-id="${newTask.id}">Start</button>
+            <button id="pause-btn-${newTask.id}" class="pause-btn bg-yellow-500 text-white px-2 py-1 rounded hover:bg-yellow-600 hidden" data-task-id="${newTask.id}">Pause</button>
+            <button id="resume-btn-${newTask.id}" class="resume-btn bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600 hidden" data-task-id="${newTask.id}">Resume</button>
+        </div>
     `;
     
     tasksContainer.appendChild(taskDiv);
@@ -200,16 +321,21 @@ function restoreTasks() {
     tasksContainer.innerHTML = '';
     userData.tasks.forEach((task, index) => {
         const taskDiv = document.createElement('div');
-        taskDiv.className = 'task-item';
+        taskDiv.className = 'task-item flex items-center justify-between';
         if (task.completed) {
             taskDiv.classList.add('task-completed');
         }
         taskDiv.innerHTML = `
-            <label class="task-label">
+            <label class="task-label flex items-center flex-grow cursor-pointer">
                 <input type="checkbox" class="task-checkbox" data-duration="${task.duration}" data-task-id="${task.id}" ${task.completed ? 'checked' : ''}>
                 <span class="ml-3">${task.text} (${formatDuration(task.duration)})</span>
-                <span id="timer-${task.id}" class="ml-4 font-mono text-sm text-blue-600">00:00</span>
             </label>
+            <div class="timer-controls flex items-center space-x-2 ml-4">
+                <span id="timer-${task.id}" class="font-mono text-sm text-blue-600">00:00</span>
+                <button id="start-btn-${task.id}" class="start-btn bg-green-500 text-white px-2 py-1 rounded hover:bg-green-600" data-task-id="${task.id}">Start</button>
+                <button id="pause-btn-${task.id}" class="pause-btn bg-yellow-500 text-white px-2 py-1 rounded hover:bg-yellow-600 hidden" data-task-id="${task.id}">Pause</button>
+                <button id="resume-btn-${task.id}" class="resume-btn bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600 hidden" data-task-id="${task.id}">Resume</button>
+            </div>
         `;
         tasksContainer.appendChild(taskDiv);
     });
@@ -389,6 +515,52 @@ profileBtn.addEventListener('click', () => {
 notificationBtn.addEventListener('click', () => {
     alert('Daily Reminder: Complete your training tasks to maintain your streak!');
 });
+
+// Function to update progress chart
+function updateProgressChart() {
+    const chartContainer = document.querySelector('.chart-container');
+    if (!chartContainer) return;
+
+    // Clear existing content
+    chartContainer.innerHTML = '';
+
+    // Get last 7 days of tasks
+    const today = new Date();
+    const last7Days = Array.from({length: 7}, (_, i) => {
+        const date = new Date(today);
+        date.setDate(date.getDate() - i);
+        return date.toISOString().split('T')[0];
+    }).reverse();
+
+    // Calculate completion rate for each day
+    const dailyStats = last7Days.map(date => {
+        const tasksForDay = userData.tasks.filter(task => task.date === date);
+        const completedTasks = tasksForDay.filter(task => task.completed);
+        const completionRate = tasksForDay.length ? (completedTasks.length / tasksForDay.length) * 100 : 0;
+        return {
+            date: date,
+            completionRate: completionRate
+        };
+    });
+
+    // Create bars
+    dailyStats.forEach((stat, index) => {
+        const barContainer = document.createElement('div');
+        barContainer.className = 'flex flex-col items-center';
+
+        const bar = document.createElement('div');
+        bar.className = 'w-8 bg-blue-200 rounded-t transition-all duration-500';
+        bar.style.height = `${stat.completionRate}%`;
+
+        const label = document.createElement('div');
+        label.className = 'text-xs text-gray-500 mt-2';
+        label.textContent = new Date(stat.date).toLocaleDateString('en-US', { weekday: 'short' });
+
+        barContainer.appendChild(bar);
+        barContainer.appendChild(label);
+        chartContainer.appendChild(barContainer);
+    });
+}
 
 // Initialize the application
 document.addEventListener('DOMContentLoaded', () => {
