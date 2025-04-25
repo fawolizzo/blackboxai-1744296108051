@@ -89,9 +89,9 @@
         }
     </style>
 </head>
-<body class="bg-gray-100 dark:bg-gray-900 min-h-screen transition-colors duration-200">
+<body class="bg-gray-100 dark:bg-slate-900 min-h-screen transition-colors duration-200">
     <!-- Navigation -->
-    <nav class="bg-white dark:bg-gray-800 shadow-lg sticky top-0 z-50">
+    <nav class="bg-white dark:bg-slate-800 shadow-lg sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4">
             <div class="flex justify-between items-center h-16">
                 <div class="flex items-center">
@@ -117,7 +117,7 @@
     <!-- Main Content -->
     <div class="max-w-7xl mx-auto px-4 py-8">
         <!-- Profile Section -->
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 mb-8">
+        <div class="bg-white dark:bg-slate-800 rounded-lg shadow-md p-6 mb-8">
             <div class="flex items-center mb-4">
                 <img src="assets/profile.svg" alt="Profile" class="rounded-full w-16 h-16">
                 <div class="ml-4">
@@ -126,25 +126,25 @@
                 </div>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
-                <div class="bg-blue-50 p-4 rounded-lg transform hover:scale-105 transition">
-                    <p class="text-2xl font-bold text-blue-600 streak-count">15</p>
-                    <p class="text-gray-600">Days Streak</p>
-                </div>
-                <div class="bg-green-50 p-4 rounded-lg transform hover:scale-105 transition">
-                    <p class="text-2xl font-bold text-green-600 completion-rate">85%</p>
-                    <p class="text-gray-600">Completion Rate</p>
-                </div>
-                <div class="bg-purple-50 p-4 rounded-lg transform hover:scale-105 transition">
-                    <p class="text-2xl font-bold text-purple-600 hours-trained">24</p>
-                    <p class="text-gray-600">Hours Trained</p>
-                </div>
+            <div class="bg-blue-50 dark:bg-blue-900/30 p-4 rounded-lg transform hover:scale-105 transition">
+                <p class="text-2xl font-bold text-blue-600 dark:text-blue-400 streak-count">15</p>
+                <p class="text-gray-600 dark:text-gray-300">Days Streak</p>
+            </div>
+            <div class="bg-green-50 dark:bg-green-900/30 p-4 rounded-lg transform hover:scale-105 transition">
+                <p class="text-2xl font-bold text-green-600 dark:text-green-400 completion-rate">85%</p>
+                <p class="text-gray-600 dark:text-gray-300">Completion Rate</p>
+            </div>
+            <div class="bg-purple-50 dark:bg-purple-900/30 p-4 rounded-lg transform hover:scale-105 transition">
+                <p class="text-2xl font-bold text-purple-600 dark:text-purple-400 hours-trained">24</p>
+                <p class="text-gray-600 dark:text-gray-300">Hours Trained</p>
+            </div>
             </div>
         </div>
 
         <!-- Daily Training -->
         <div class="grid md:grid-cols-2 gap-8">
             <!-- Training Plan -->
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 training-plan">
+            <div class="bg-white dark:bg-slate-800 rounded-lg shadow-md p-6 training-plan">
                 <h3 class="text-lg font-semibold mb-4 flex items-center justify-between">
                     <div class="flex items-center">
                         <i class="fas fa-tasks text-blue-600 mr-2"></i>
@@ -156,7 +156,7 @@
                     <!-- Tasks will be added here -->
                 </div>
                 <div class="mt-4 space-y-2 buttons-container">
-                    <button class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition w-full flex items-center justify-center add-task-btn">
+                <button class="bg-blue-600 dark:bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition w-full flex items-center justify-center add-task-btn">
                         <i class="fas fa-plus mr-2"></i>
                         Add Task
                     </button>
@@ -164,7 +164,7 @@
             </div>
 
             <!-- Training Log -->
-            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6 training-log">
+            <div class="bg-white dark:bg-slate-800 rounded-lg shadow-md p-6 training-log">
                 <h3 class="text-lg font-semibold mb-4 flex items-center">
                     <i class="fas fa-journal-whills text-blue-600 mr-2"></i>
                     Training Log
@@ -172,7 +172,7 @@
                 <div class="space-y-4 logs-container">
                     <!-- Logs will be added here -->
                 </div>
-                <button class="mt-4 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition w-full flex items-center justify-center add-log-btn">
+                <button class="mt-4 bg-blue-600 dark:bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition w-full flex items-center justify-center add-log-btn">
                     <i class="fas fa-plus mr-2"></i>
                     Add Log Entry
                 </button>
@@ -188,7 +188,7 @@
                 </div>
                 <div class="text-sm text-gray-500">Last 7 Days</div>
             </h3>
-            <div class="progress-chart h-64 bg-gray-50 rounded-lg p-4">
+            <div class="progress-chart h-64 bg-gray-50 dark:bg-slate-800/50 rounded-lg p-4">
                 <div class="chart-container h-full flex items-end justify-between">
                     <p class="text-gray-500 text-center">Complete your daily tasks to see progress</p>
                 </div>
@@ -207,7 +207,7 @@
     </div>
 
     <!-- Completion Alert -->
-    <div id="completionAlert" class="fixed bottom-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg opacity-0 transform translate-y-full">
+    <div id="completionAlert" class="fixed bottom-4 right-4 bg-green-500 dark:bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg opacity-0 transform translate-y-full">
         <div class="flex items-center">
             <i class="fas fa-check-circle mr-2"></i>
             <span>Great job! All tasks completed for today!</span>
