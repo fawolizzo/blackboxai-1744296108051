@@ -64,13 +64,12 @@ function setupCheckboxListeners() {
     });
 }
 
-// Timer variables
 let timerInterval = null;
-let timerRemaining = 0;
 let activeTaskId = null;
 let timerPaused = false;
+let timerStartTime = null;
+let timerEndTime = null;
 
-// Utility functions
 function getToday() {
     const date = new Date();
     return date.toISOString().split('T')[0];
@@ -135,18 +134,21 @@ function startTimer(taskId) {
     }
     activeTaskId = taskId;
     const task = userData.tasks.find(t => t.id === taskId);
-    // Fix: convert duration in hours to seconds (hours * 3600)
-    timerRemaining = Math.floor(task.duration * 3600);
     timerPaused = false;
+    timerStartTime = Date.now();
+    timerEndTime = timerStartTime + Math.floor(task.duration * 3600 * 1000);
     updateTimerDisplay(taskId);
     updateTimerButtons(taskId);
     saveTimerState();
     timerInterval = setInterval(() => {
         if (!timerPaused) {
-            timerRemaining--;
-            updateTimerDisplay(taskId);
+            const now = Date.now();
+            let remainingMs = timerEndTime - now;
+            if (remainingMs < 0) remainingMs = 0;
+            const remainingSeconds = Math.floor(remainingMs / 1000);
+            updateTimerDisplayWithSeconds(taskId, remainingSeconds);
             saveTimerState();
-            if (timerRemaining <= 0) {
+            if (remainingSeconds <= 0) {
                 clearInterval(timerInterval);
                 completeTask(taskId);
                 updateTimerButtons(null);
@@ -164,6 +166,8 @@ function pauseTimer() {
 
 function resumeTimer() {
     timerPaused = false;
+    // Adjust timerEndTime to account for pause duration
+    timerEndTime += Date.now() - timerPauseTime;
     updateTimerButtons(activeTaskId);
     saveTimerState();
 }
@@ -171,7 +175,18 @@ function resumeTimer() {
 function updateTimerDisplay(taskId) {
     const timerSpan = document.querySelector(`#timer-${taskId}`);
     if (timerSpan) {
-        timerSpan.textContent = formatTime(timerRemaining);
+        const now = Date.now();
+        let remainingMs = timerEndTime - now;
+        if (remainingMs < 0) remainingMs = 0;
+        const remainingSeconds = Math.floor(remainingMs / 1000);
+        timerSpan.textContent = formatTime(remainingSeconds);
+    }
+}
+
+function updateTimerDisplayWithSeconds(taskId, seconds) {
+    const timerSpan = document.querySelector(`#timer-${taskId}`);
+    if (timerSpan) {
+        timerSpan.textContent = formatTime(seconds);
     }
 }
 
@@ -200,41 +215,63 @@ function updateTimerButtons(taskId) {
     });
 }
 
-// Timer state persistence
 function saveTimerState() {
     if (activeTaskId !== null) {
         localStorage.setItem(TIMER_ACTIVE_TASK_KEY, activeTaskId.toString());
-        localStorage.setItem(TIMER_REMAINING_KEY, timerRemaining.toString());
+        localStorage.setItem('timerStartTime', timerStartTime.toString());
+        localStorage.setItem('timerEndTime', timerEndTime.toString());
+        localStorage.setItem('timerPaused', timerPaused.toString());
+        if (timerPaused) {
+            localStorage.setItem('timerPauseTime', timerPauseTime.toString());
+        } else {
+            localStorage.removeItem('timerPauseTime');
+        }
     }
 }
 
 function clearTimerState() {
     localStorage.removeItem(TIMER_ACTIVE_TASK_KEY);
-    localStorage.removeItem(TIMER_REMAINING_KEY);
+    localStorage.removeItem('timerStartTime');
+    localStorage.removeItem('timerEndTime');
+    localStorage.removeItem('timerPaused');
+    localStorage.removeItem('timerPauseTime');
 }
 
 function restoreTimerState() {
     const savedTaskId = localStorage.getItem(TIMER_ACTIVE_TASK_KEY);
-    const savedRemaining = localStorage.getItem(TIMER_REMAINING_KEY);
-    if (savedTaskId && savedRemaining) {
+    const savedStartTime = localStorage.getItem('timerStartTime');
+    const savedEndTime = localStorage.getItem('timerEndTime');
+    const savedPaused = localStorage.getItem('timerPaused') === 'true';
+    const savedPauseTime = localStorage.getItem('timerPauseTime');
+
+    if (savedTaskId && savedStartTime && savedEndTime) {
         activeTaskId = parseInt(savedTaskId);
-        timerRemaining = parseInt(savedRemaining);
-        timerPaused = false;
+        timerStartTime = parseInt(savedStartTime);
+        timerEndTime = parseInt(savedEndTime);
+        timerPaused = savedPaused;
+        timerPauseTime = savedPauseTime ? parseInt(savedPauseTime) : null;
+
         updateTimerDisplay(activeTaskId);
         updateTimerButtons(activeTaskId);
-        timerInterval = setInterval(() => {
-            if (!timerPaused) {
-                timerRemaining--;
-                updateTimerDisplay(activeTaskId);
-                saveTimerState();
-                if (timerRemaining <= 0) {
-                    clearInterval(timerInterval);
-                    completeTask(activeTaskId);
-                    updateTimerButtons(null);
-                    clearTimerState();
+
+        if (!timerPaused) {
+            timerInterval = setInterval(() => {
+                if (!timerPaused) {
+                    const now = Date.now();
+                    let remainingMs = timerEndTime - now;
+                    if (remainingMs < 0) remainingMs = 0;
+                    const remainingSeconds = Math.floor(remainingMs / 1000);
+                    updateTimerDisplayWithSeconds(activeTaskId, remainingSeconds);
+                    saveTimerState();
+                    if (remainingSeconds <= 0) {
+                        clearInterval(timerInterval);
+                        completeTask(activeTaskId);
+                        updateTimerButtons(null);
+                        clearTimerState();
+                    }
                 }
-            }
-        }, 1000);
+            }, 1000);
+        }
     }
 }
 
@@ -472,7 +509,6 @@ function initializeTasks() {
     saveData();
 }
 
-// Event listeners
 function setupEventListeners() {
     tasksContainer.addEventListener('click', (e) => {
         if (e.target.tagName === 'INPUT' && e.target.type === 'checkbox') {
@@ -489,6 +525,7 @@ function setupEventListeners() {
             startTimer(taskId);
         } else if (e.target.classList.contains('pause-btn')) {
             pauseTimer();
+            timerPauseTime = Date.now();
         } else if (e.target.classList.contains('resume-btn')) {
             resumeTimer();
         }
