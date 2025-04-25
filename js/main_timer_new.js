@@ -14,16 +14,26 @@ let themeBtn;
 // Theme handling
 function initializeTheme() {
     const savedTheme = localStorage.getItem('theme') || 'light';
-    document.documentElement.className = savedTheme;
+    const html = document.documentElement;
+    html.classList.remove('dark', 'light');
+    html.classList.add(savedTheme);
     updateThemeIcon(savedTheme);
 }
 
 function toggleTheme() {
-    const currentTheme = document.documentElement.className;
-    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-    document.documentElement.className = newTheme;
-    localStorage.setItem('theme', newTheme);
-    updateThemeIcon(newTheme);
+    const html = document.documentElement;
+    const isDark = html.classList.contains('dark');
+    if (isDark) {
+        html.classList.remove('dark');
+        html.classList.add('light');
+        localStorage.setItem('theme', 'light');
+        updateThemeIcon('light');
+    } else {
+        html.classList.remove('light');
+        html.classList.add('dark');
+        localStorage.setItem('theme', 'dark');
+        updateThemeIcon('dark');
+    }
 }
 
 function updateThemeIcon(theme) {
@@ -521,11 +531,11 @@ function updateProgressChart() {
         barContainer.className = 'flex flex-col items-center';
 
         const bar = document.createElement('div');
-        bar.className = 'w-8 bg-blue-200 rounded-t transition-all duration-500';
+        bar.className = 'w-8 bg-blue-200 dark:bg-blue-500/30 rounded-t transition-all duration-500';
         bar.style.height = `${stat.completionRate}%`;
 
         const label = document.createElement('div');
-        label.className = 'text-xs text-gray-500 mt-2';
+        label.className = 'text-xs text-gray-500 dark:text-gray-400 mt-2';
         label.textContent = new Date(stat.date).toLocaleDateString('en-US', { weekday: 'short' });
 
         barContainer.appendChild(bar);
@@ -680,7 +690,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Create Reset Button
     resetBtn = document.createElement('button');
-    resetBtn.className = 'mt-4 bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition w-full flex items-center justify-center';
+    resetBtn.className = 'mt-4 bg-red-600 dark:bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-700 dark:hover:bg-red-600 transition w-full flex items-center justify-center';
     resetBtn.innerHTML = '<i class="fas fa-trash-alt mr-2"></i>Reset Training Plan';
 
     // Add Reset button after Add Task button
