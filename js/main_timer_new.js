@@ -180,7 +180,7 @@ function startTimer(taskId) {
             const now = Date.now();
             let remainingMs = timerEndTime - now;
             if (remainingMs < 0) remainingMs = 0;
-            const remainingSeconds = Math.floor(remainingMs / 1000);
+            const remainingSeconds = Math.ceil(remainingMs / 1000);
             updateTimerDisplayWithSeconds(taskId, remainingSeconds);
             saveTimerState();
             if (remainingSeconds <= 0) {
