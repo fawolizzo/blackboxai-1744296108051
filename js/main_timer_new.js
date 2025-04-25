@@ -70,6 +70,40 @@ let timerPaused = false;
 let timerStartTime = null;
 let timerEndTime = null;
 
+// Handle page visibility to avoid throttling issues
+document.addEventListener('visibilitychange', () => {
+    if (activeTaskId === null) return;
+
+    if (document.hidden) {
+        // Page is hidden, clear interval to avoid throttling
+        if (timerInterval) {
+            clearInterval(timerInterval);
+            timerInterval = null;
+        }
+    } else {
+        // Page is visible, update timer display immediately and restart interval if not paused
+        updateTimerDisplay(activeTaskId);
+        if (!timerPaused && !timerInterval) {
+            timerInterval = setInterval(() => {
+                if (!timerPaused) {
+                    const now = Date.now();
+                    let remainingMs = timerEndTime - now;
+                    if (remainingMs < 0) remainingMs = 0;
+                    const remainingSeconds = Math.floor(remainingMs / 1000);
+                    updateTimerDisplayWithSeconds(activeTaskId, remainingSeconds);
+                    saveTimerState();
+                    if (remainingSeconds <= 0) {
+                        clearInterval(timerInterval);
+                        completeTask(activeTaskId);
+                        updateTimerButtons(null);
+                        clearTimerState();
+                    }
+                }
+            }, 1000);
+        }
+    }
+});
+
 function getToday() {
     const date = new Date();
     return date.toISOString().split('T')[0];
