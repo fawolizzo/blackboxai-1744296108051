@@ -13,27 +13,26 @@ let themeBtn;
 
 // Theme handling
 function initializeTheme() {
-    const savedTheme = localStorage.getItem('theme') || 'light';
-    const html = document.documentElement;
-    html.classList.remove('dark', 'light');
-    html.classList.add(savedTheme);
-    updateThemeIcon(savedTheme);
+    // Check for saved theme or system preference
+    const savedTheme = localStorage.getItem('theme');
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const theme = savedTheme || (prefersDark ? 'dark' : 'light');
+    
+    document.documentElement.classList.remove('light', 'dark');
+    document.documentElement.classList.add(theme);
+    localStorage.setItem('theme', theme);
+    updateThemeIcon(theme);
 }
 
 function toggleTheme() {
     const html = document.documentElement;
-    const isDark = html.classList.contains('dark');
-    if (isDark) {
-        html.classList.remove('dark');
-        html.classList.add('light');
-        localStorage.setItem('theme', 'light');
-        updateThemeIcon('light');
-    } else {
-        html.classList.remove('light');
-        html.classList.add('dark');
-        localStorage.setItem('theme', 'dark');
-        updateThemeIcon('dark');
-    }
+    const currentTheme = html.classList.contains('dark') ? 'dark' : 'light';
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    
+    html.classList.remove(currentTheme);
+    html.classList.add(newTheme);
+    localStorage.setItem('theme', newTheme);
+    updateThemeIcon(newTheme);
 }
 
 function updateThemeIcon(theme) {
