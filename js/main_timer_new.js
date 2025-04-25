@@ -131,8 +131,9 @@ function formatDuration(duration) {
 }
 
 function formatTime(seconds) {
+    if (seconds < 0) seconds = 0;
     const m = Math.floor(seconds / 60);
-    const s = seconds % 60;
+    const s = Math.floor(seconds % 60);
     return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
 }
 
@@ -168,26 +169,31 @@ function startTimer(taskId) {
     }
     activeTaskId = taskId;
     const task = userData.tasks.find(t => t.id === taskId);
+    const durationInSeconds = Math.floor(task.duration * 3600);
     timerPaused = false;
     timerStartTime = Date.now();
-    timerEndTime = timerStartTime + Math.floor(task.duration * 3600 * 1000);
-    // Update display immediately with full duration before interval starts
-    updateTimerDisplayWithSeconds(taskId, Math.floor(task.duration * 3600));
+    timerEndTime = timerStartTime + (durationInSeconds * 1000);
+    
+    // Show initial time
+    updateTimerDisplayWithSeconds(taskId, durationInSeconds);
     updateTimerButtons(taskId);
     saveTimerState();
+    
     timerInterval = setInterval(() => {
         if (!timerPaused) {
             const now = Date.now();
-            let remainingMs = timerEndTime - now;
-            if (remainingMs < 0) remainingMs = 0;
-            const remainingSeconds = Math.ceil(remainingMs / 1000);
-            updateTimerDisplayWithSeconds(taskId, remainingSeconds);
-            saveTimerState();
-            if (remainingSeconds <= 0) {
+            const elapsed = now - timerStartTime;
+            const remaining = durationInSeconds - Math.floor(elapsed / 1000);
+            
+            if (remaining <= 0) {
+                updateTimerDisplayWithSeconds(taskId, 0);
                 clearInterval(timerInterval);
                 completeTask(taskId);
                 updateTimerButtons(null);
                 clearTimerState();
+            } else {
+                updateTimerDisplayWithSeconds(taskId, remaining);
+                saveTimerState();
             }
         }
     }, 1000);
