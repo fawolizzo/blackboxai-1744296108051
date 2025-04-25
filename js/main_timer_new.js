@@ -171,7 +171,8 @@ function startTimer(taskId) {
     timerPaused = false;
     timerStartTime = Date.now();
     timerEndTime = timerStartTime + Math.floor(task.duration * 3600 * 1000);
-    updateTimerDisplay(taskId);
+    // Update display immediately with full duration before interval starts
+    updateTimerDisplayWithSeconds(taskId, Math.floor(task.duration * 3600));
     updateTimerButtons(taskId);
     saveTimerState();
     timerInterval = setInterval(() => {
