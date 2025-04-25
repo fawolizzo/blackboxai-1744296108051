@@ -9,6 +9,31 @@ let logsContainer;
 let addLogBtn;
 let addTaskBtn;
 let resetBtn;
+let themeBtn;
+
+// Theme handling
+function initializeTheme() {
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    document.documentElement.className = savedTheme;
+    updateThemeIcon(savedTheme);
+}
+
+function toggleTheme() {
+    const currentTheme = document.documentElement.className;
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    document.documentElement.className = newTheme;
+    localStorage.setItem('theme', newTheme);
+    updateThemeIcon(newTheme);
+}
+
+function updateThemeIcon(theme) {
+    const icon = themeBtn.querySelector('i');
+    if (theme === 'dark') {
+        icon.className = 'fas fa-sun text-2xl';
+    } else {
+        icon.className = 'fas fa-moon text-2xl';
+    }
+}
 
 // Sample user data (initial state)
 let userData = {
@@ -332,10 +357,10 @@ function addTask(text, duration) {
     taskDiv.innerHTML = `
         <label class="task-label flex items-center flex-grow cursor-pointer">
             <input type="checkbox" class="task-checkbox" data-duration="${duration}" data-task-id="${newTask.id}">
-            <span class="ml-3">${text} (${formatDuration(duration)})</span>
+            <span class="ml-3 dark:text-gray-300">${text} (${formatDuration(duration)})</span>
         </label>
         <div class="timer-controls flex items-center space-x-2 ml-4">
-            <span id="timer-${newTask.id}" class="font-mono text-sm text-blue-600">00:00</span>
+            <span id="timer-${newTask.id}" class="font-mono text-sm text-blue-600 dark:text-blue-400">00:00</span>
             <button id="start-btn-${newTask.id}" class="start-btn bg-green-500 text-white px-2 py-1 rounded hover:bg-green-600" data-task-id="${newTask.id}">Start</button>
             <button id="pause-btn-${newTask.id}" class="pause-btn bg-yellow-500 text-white px-2 py-1 rounded hover:bg-yellow-600 hidden" data-task-id="${newTask.id}">Pause</button>
             <button id="resume-btn-${newTask.id}" class="resume-btn bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600 hidden" data-task-id="${newTask.id}">Resume</button>
@@ -371,17 +396,17 @@ function restoreTasks() {
     tasksContainer.innerHTML = '';
     userData.tasks.forEach((task, index) => {
         const taskDiv = document.createElement('div');
-        taskDiv.className = 'task-item flex items-center justify-between';
+        taskDiv.className = 'task-item flex items-center justify-between dark:text-white';
         if (task.completed) {
             taskDiv.classList.add('task-completed');
         }
         taskDiv.innerHTML = `
             <label class="task-label flex items-center flex-grow cursor-pointer">
                 <input type="checkbox" class="task-checkbox" data-duration="${task.duration}" data-task-id="${task.id}" ${task.completed ? 'checked' : ''}>
-                <span class="ml-3">${task.text} (${formatDuration(task.duration)})</span>
+                <span class="ml-3 dark:text-gray-300">${task.text} (${formatDuration(task.duration)})</span>
             </label>
             <div class="timer-controls flex items-center space-x-2 ml-4">
-                <span id="timer-${task.id}" class="font-mono text-sm text-blue-600">00:00</span>
+                <span id="timer-${task.id}" class="font-mono text-sm text-blue-600 dark:text-blue-400">00:00</span>
                 ${task.completed ? '' : `
                 <button id="start-btn-${task.id}" class="start-btn bg-green-500 text-white px-2 py-1 rounded hover:bg-green-600" data-task-id="${task.id}">Start</button>
                 <button id="pause-btn-${task.id}" class="pause-btn bg-yellow-500 text-white px-2 py-1 rounded hover:bg-yellow-600 hidden" data-task-id="${task.id}">Pause</button>
@@ -427,18 +452,18 @@ function restoreLogs() {
             const dailyHours = calculateDailyHours(userData.tasks, date);
             
             const dateHeader = document.createElement('div');
-            dateHeader.className = 'text-lg font-semibold text-blue-600 mb-4 mt-6 border-b pb-2 flex justify-between items-center';
+            dateHeader.className = 'text-lg font-semibold text-blue-600 dark:text-blue-400 mb-4 mt-6 border-b dark:border-gray-700 pb-2 flex justify-between items-center';
             dateHeader.innerHTML = `
                 <span>${date === new Date().toLocaleDateString() ? 'Today' : date}</span>
-                <span class="text-sm text-gray-600">Hours: ${formatDuration(dailyHours)}</span>
+                <span class="text-sm text-gray-600 dark:text-gray-400">Hours: ${formatDuration(dailyHours)}</span>
             `;
             logsContainer.appendChild(dateHeader);
             
             logsByDate[date].forEach(log => {
                 const logDiv = document.createElement('div');
-                logDiv.className = 'border-l-4 border-green-500 pl-4 p-3 hover:bg-gray-50 rounded-lg transition mb-2';
+            logDiv.className = 'border-l-4 border-green-500 pl-4 p-3 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition mb-2 dark:text-white';
                 logDiv.innerHTML = `
-                    <p class="text-sm text-gray-600">${log.time || new Date(log.timestamp).toLocaleTimeString()}</p>
+                    <p class="text-sm text-gray-600 dark:text-gray-400">${log.time || new Date(log.timestamp).toLocaleTimeString()}</p>
                     <p>${log.text}</p>
                 `;
                 logsContainer.appendChild(logDiv);
@@ -551,6 +576,8 @@ function initializeTasks() {
 }
 
 function setupEventListeners() {
+    // Theme toggle
+    themeBtn.addEventListener('click', toggleTheme);
     tasksContainer.addEventListener('click', (e) => {
         if (e.target.tagName === 'INPUT' && e.target.type === 'checkbox') {
             return;
@@ -649,6 +676,7 @@ document.addEventListener('DOMContentLoaded', () => {
     logsContainer = document.querySelector('.logs-container');
     addLogBtn = document.querySelector('.add-log-btn');
     addTaskBtn = document.querySelector('.add-task-btn');
+    themeBtn = document.getElementById('themeBtn');
 
     // Create Reset Button
     resetBtn = document.createElement('button');
@@ -658,7 +686,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // Add Reset button after Add Task button
     document.querySelector('.buttons-container').appendChild(resetBtn);
 
-    // Initialize event listeners
+    // Initialize theme and event listeners
+    initializeTheme();
     setupEventListeners();
 
     // Load data and update UI
