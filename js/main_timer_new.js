@@ -209,7 +209,14 @@ function updateStreak() {
         return;
     }
 
-    let streak = 1;
+    const todayStr = getToday();
+    let streak = 0;
+
+    // If today is completed, start streak at 1, else 0
+    if (completedDates[0] === todayStr) {
+        streak = 1;
+    }
+
     for (let i = 1; i < completedDates.length; i++) {
         const prevDate = new Date(completedDates[i - 1]);
         const currDate = new Date(completedDates[i]);
