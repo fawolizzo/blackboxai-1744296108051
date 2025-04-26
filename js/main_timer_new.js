@@ -188,6 +188,40 @@ function updateProgress() {
     const completedTasks = userData.tasks.filter(task => task.completed).length;
     userData.completionRate = totalTasks ? Math.round((completedTasks / totalTasks) * 100) : 0;
     updateUI();
+    updateStreak();
+}
+
+// Calculate current streak of consecutive days with completed tasks
+function updateStreak() {
+    if (!userData.tasks.length) {
+        userData.streak = 0;
+        return;
+    }
+
+    // Get unique dates with completed tasks, sorted descending
+    const completedDates = [...new Set(userData.tasks
+        .filter(t => t.completed)
+        .map(t => t.date))]
+        .sort((a, b) => new Date(b) - new Date(a));
+
+    if (!completedDates.length) {
+        userData.streak = 0;
+        return;
+    }
+
+    let streak = 1;
+    for (let i = 1; i < completedDates.length; i++) {
+        const prevDate = new Date(completedDates[i - 1]);
+        const currDate = new Date(completedDates[i]);
+        const diffDays = (prevDate - currDate) / (1000 * 60 * 60 * 24);
+        if (diffDays === 1) {
+            streak++;
+        } else {
+            break;
+        }
+    }
+
+    userData.streak = streak;
 }
 
 function updateDailyProgress() {
