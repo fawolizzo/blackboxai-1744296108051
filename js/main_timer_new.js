@@ -768,13 +768,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Create Reset Button
     resetBtn = document.createElement('button');
-    resetBtn.className = 'mt-4 bg-red-600 dark:bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-700 dark:hover:bg-red-600 transition w-full flex items-center justify-center';
-    resetBtn.innerHTML = '<i class="fas fa-trash-alt mr-2"></i>Reset Training Plan';
+    resetBtn.className = 'mt-4 w-full rounded-lg border border-red-500 text-red-500 p-4 flex items-center justify-center gap-2 bg-transparent hover:bg-red-500/10 transition-all';
+    resetBtn.innerHTML = '<i class="fas fa-sync-alt"></i>Reset Training Plan';
 
     // Create Export Button
     const exportBtn = document.createElement('button');
-    exportBtn.className = 'mt-4 bg-gradient-to-r from-blue-500 to-blue-700 shadow-lg text-white px-5 py-3 rounded-xl hover:from-blue-600 hover:to-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 transition w-full flex items-center justify-center';
-    exportBtn.innerHTML = '<i class="fas fa-file-export mr-2"></i>Export Data';
+    exportBtn.className = 'mt-4 w-full rounded-lg border border-blue-500 text-blue-500 p-4 flex items-center justify-center gap-2 bg-transparent hover:bg-blue-500/10 transition-all';
+    exportBtn.innerHTML = '<i class="fas fa-file-export"></i>Export Data';
     exportBtn.addEventListener('click', exportData);
 
     // Create Import Button and hidden file input
@@ -785,8 +785,8 @@ document.addEventListener('DOMContentLoaded', () => {
     importInput.addEventListener('change', importData);
 
     const importBtn = document.createElement('button');
-    importBtn.className = 'mt-4 bg-gradient-to-r from-green-500 to-green-700 shadow-lg text-white px-5 py-3 rounded-xl hover:from-green-600 hover:to-green-800 focus:outline-none focus:ring-4 focus:ring-green-300 transition w-full flex items-center justify-center';
-    importBtn.innerHTML = '<i class="fas fa-file-import mr-2"></i>Import Data';
+    importBtn.className = 'mt-4 w-full rounded-lg border border-green-500 text-green-500 p-4 flex items-center justify-center gap-2 bg-transparent hover:bg-green-500/10 transition-all';
+    importBtn.innerHTML = '<i class="fas fa-file-import"></i>Import Data';
     importBtn.addEventListener('click', () => importInput.click());
 
     // Add buttons to the buttons container
