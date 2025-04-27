@@ -714,6 +714,44 @@ function setupEventListeners() {
     });
 }
 
+function exportData() {
+    const dataStr = JSON.stringify(userData, null, 2);
+    const blob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'chess-training-backup.json';
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
+function importData(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        try {
+            const importedData = JSON.parse(e.target.result);
+            if (importedData && typeof importedData === 'object') {
+                userData = importedData;
+                saveData();
+                updateUI();
+                updateProgressChart();
+                restoreTasks();
+                restoreLogs();
+                restoreTimerState();
+                alert('Data imported successfully!');
+            } else {
+                alert('Invalid data format.');
+            }
+        } catch (error) {
+            alert('Error reading file: ' + error.message);
+        }
+    };
+    reader.readAsText(file);
+}
+
 // Initialize application
 document.addEventListener('DOMContentLoaded', () => {
     // Initialize DOM Elements
@@ -733,8 +771,32 @@ document.addEventListener('DOMContentLoaded', () => {
     resetBtn.className = 'mt-4 bg-red-600 dark:bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-700 dark:hover:bg-red-600 transition w-full flex items-center justify-center';
     resetBtn.innerHTML = '<i class="fas fa-trash-alt mr-2"></i>Reset Training Plan';
 
+    // Create Export Button
+    const exportBtn = document.createElement('button');
+    exportBtn.className = 'mt-4 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition w-full flex items-center justify-center';
+    exportBtn.innerHTML = '<i class="fas fa-file-export mr-2"></i>Export Data';
+    exportBtn.addEventListener('click', exportData);
+
+    // Create Import Button and hidden file input
+    const importInput = document.createElement('input');
+    importInput.type = 'file';
+    importInput.accept = 'application/json';
+    importInput.style.display = 'none';
+    importInput.addEventListener('change', importData);
+
+    const importBtn = document.createElement('button');
+    importBtn.className = 'mt-4 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition w-full flex items-center justify-center';
+    importBtn.innerHTML = '<i class="fas fa-file-import mr-2"></i>Import Data';
+    importBtn.addEventListener('click', () => importInput.click());
+
+    // Add buttons to the buttons container
+    const buttonsContainer = document.querySelector('.buttons-container');
+    buttonsContainer.appendChild(exportBtn);
+    buttonsContainer.appendChild(importBtn);
+    buttonsContainer.appendChild(importInput);
+
     // Add Reset button after Add Task button
-    document.querySelector('.buttons-container').appendChild(resetBtn);
+    buttonsContainer.appendChild(resetBtn);
 
     // Initialize theme and event listeners
     initializeTheme();
