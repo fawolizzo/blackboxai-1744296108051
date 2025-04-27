@@ -502,19 +502,19 @@ function restoreLogs() {
             const dailyHours = calculateDailyHours(userData.tasks, date);
             
             const dateHeader = document.createElement('div');
-            dateHeader.className = 'text-lg font-semibold text-blue-600 dark:text-blue-400 mb-4 mt-6 border-b dark:border-gray-700 pb-2 flex justify-between items-center';
+            dateHeader.className = 'text-lg font-semibold text-purple-700 dark:text-purple-400 mb-4 mt-6 border-b dark:border-gray-700 pb-2 flex justify-between items-center';
             dateHeader.innerHTML = `
                 <span>${date === new Date().toLocaleDateString() ? 'Today' : date}</span>
-                <span class="text-sm text-gray-600 dark:text-gray-400">Hours: ${formatDuration(dailyHours)}</span>
+                <span class="text-sm text-purple-600 dark:text-purple-400">Hours: ${formatDuration(dailyHours)}</span>
             `;
             logsContainer.appendChild(dateHeader);
             
             logsByDate[date].forEach(log => {
                 const logDiv = document.createElement('div');
-            logDiv.className = 'border-l-4 border-green-500 pl-4 p-3 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition mb-2 dark:text-white';
+            logDiv.className = 'border-l-4 border-purple-500 dark:border-purple-400 pl-4 p-3 hover:bg-purple-50 dark:hover:bg-purple-900/20 rounded-lg transition mb-2 text-gray-900 dark:text-white';
                 logDiv.innerHTML = `
-                    <p class="text-sm text-gray-600 dark:text-gray-400">${log.time || new Date(log.timestamp).toLocaleTimeString()}</p>
-                    <p>${log.text}</p>
+                    <p class="text-sm text-purple-600 dark:text-purple-400">${log.time || new Date(log.timestamp).toLocaleTimeString()}</p>
+                    <p class="text-gray-800 dark:text-gray-200">${log.text}</p>
                 `;
                 logsContainer.appendChild(logDiv);
             });
