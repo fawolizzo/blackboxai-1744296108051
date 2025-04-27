@@ -773,7 +773,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Create Export Button
     const exportBtn = document.createElement('button');
-    exportBtn.className = 'mt-4 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition w-full flex items-center justify-center';
+    exportBtn.className = 'mt-4 bg-gradient-to-r from-blue-500 to-blue-700 shadow-lg text-white px-5 py-3 rounded-xl hover:from-blue-600 hover:to-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 transition w-full flex items-center justify-center';
     exportBtn.innerHTML = '<i class="fas fa-file-export mr-2"></i>Export Data';
     exportBtn.addEventListener('click', exportData);
 
@@ -785,7 +785,7 @@ document.addEventListener('DOMContentLoaded', () => {
     importInput.addEventListener('change', importData);
 
     const importBtn = document.createElement('button');
-    importBtn.className = 'mt-4 bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition w-full flex items-center justify-center';
+    importBtn.className = 'mt-4 bg-gradient-to-r from-green-500 to-green-700 shadow-lg text-white px-5 py-3 rounded-xl hover:from-green-600 hover:to-green-800 focus:outline-none focus:ring-4 focus:ring-green-300 transition w-full flex items-center justify-center';
     importBtn.innerHTML = '<i class="fas fa-file-import mr-2"></i>Import Data';
     importBtn.addEventListener('click', () => importInput.click());
 
