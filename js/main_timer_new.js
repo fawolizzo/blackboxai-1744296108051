@@ -762,7 +762,6 @@ document.addEventListener('DOMContentLoaded', () => {
     streakBadge = document.querySelector('.streak-badge');
     tasksContainer = document.querySelector('.tasks-container');
     logsContainer = document.querySelector('.logs-container');
-    addLogBtn = document.querySelector('.add-log-btn');
     addTaskBtn = document.querySelector('.add-task-btn');
     themeBtn = document.getElementById('themeBtn');
 
