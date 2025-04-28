@@ -453,12 +453,32 @@ let completedTasksPage = 1;
 function restoreTasks() {
     tasksContainer.innerHTML = '';
 
-    // Separate completed and active tasks
-    const activeTasks = userData.tasks.filter(task => !task.completed);
+    // Find active task (task with timer running)
+    const activeTask = userData.tasks.find(task => !task.completed && task.id === activeTaskId);
+
+    // Separate completed and other active tasks
+    const otherActiveTasks = userData.tasks.filter(task => !task.completed && task.id !== activeTaskId);
     const completedTasks = userData.tasks.filter(task => task.completed);
 
-    // Render active tasks first
-    activeTasks.forEach(task => {
+    // Render active task first (if any)
+    if (activeTask) {
+        const taskDiv = document.createElement('div');
+        taskDiv.className = 'task-item flex items-center justify-between dark:text-white active-task';
+        taskDiv.innerHTML = `
+            <label class="task-label flex items-center flex-grow cursor-pointer">
+                <input type="checkbox" class="task-checkbox" data-duration="${activeTask.duration}" data-task-id="${activeTask.id}">
+                <span class="ml-3 dark:text-gray-300 font-semibold">${activeTask.text} (${formatDuration(activeTask.duration)})</span>
+            </label>
+            <div class="timer-controls flex items-center space-x-2 ml-4">
+                <span id="timer-${activeTask.id}" class="font-mono text-sm text-blue-600 dark:text-blue-400">00:00</span>
+                <button id="pause-btn-${activeTask.id}" class="pause-btn bg-yellow-500 text-yellow-900 px-3 py-1 rounded hover:bg-yellow-600 transition">Pause</button>
+            </div>
+        `;
+        tasksContainer.appendChild(taskDiv);
+    }
+
+    // Render other active tasks
+    otherActiveTasks.forEach(task => {
         const taskDiv = document.createElement('div');
         taskDiv.className = 'task-item flex items-center justify-between dark:text-white';
         taskDiv.innerHTML = `
@@ -467,7 +487,6 @@ function restoreTasks() {
                 <span class="ml-3 dark:text-gray-300">${task.text} (${formatDuration(task.duration)})</span>
             </label>
             <div class="timer-controls flex items-center space-x-2 ml-4">
-                <span id="timer-${task.id}" class="font-mono text-sm text-blue-600 dark:text-blue-400">00:00</span>
                 <button id="start-btn-${task.id}" class="start-btn bg-green-500 text-white px-2 py-1 rounded hover:bg-green-600" data-task-id="${task.id}">Start</button>
                 <button id="pause-btn-${task.id}" class="pause-btn bg-yellow-500 text-white px-2 py-1 rounded hover:bg-yellow-600 hidden" data-task-id="${task.id}">Pause</button>
                 <button id="resume-btn-${task.id}" class="resume-btn bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600 hidden" data-task-id="${task.id}">Resume</button>
