@@ -151,6 +151,30 @@
                 <p class="text-gray-600 dark:text-gray-400">Hours Trained</p>
             </div>
             </div>
+
+            <!-- Achievements Section -->
+            <div class="mt-8 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                <div class="achievement bronze rounded-lg p-4 text-white">
+                    <i class="fas fa-fire text-2xl mb-2"></i>
+                    <h4 class="font-bold">7-Day Warrior</h4>
+                    <p class="text-sm opacity-80">7-day streak</p>
+                </div>
+                <div class="achievement silver rounded-lg p-4 text-white">
+                    <i class="fas fa-clock text-2xl mb-2"></i>
+                    <h4 class="font-bold">Chess Scholar</h4>
+                    <p class="text-sm opacity-80">50 hours trained</p>
+                </div>
+                <div class="achievement locked rounded-lg p-4 text-white">
+                    <i class="fas fa-check text-2xl mb-2"></i>
+                    <h4 class="font-bold">Task Master</h4>
+                    <p class="text-sm opacity-80">500 tasks completed</p>
+                </div>
+                <div class="achievement rainbow rounded-lg p-4 text-white">
+                    <i class="fas fa-calendar-star text-2xl mb-2"></i>
+                    <h4 class="font-bold">Perfect Month</h4>
+                    <p class="text-sm opacity-80">30 days perfect</p>
+                </div>
+            </div>
         </div>
 
         <!-- Daily Training -->
@@ -222,6 +246,39 @@
         </div>
     </div>
 
+    <script src="js/achievements.js"></script>
     <script src="js/main_timer_new.js"></script>
+
+    <!-- Achievement Styles -->
+    <style>
+        .achievement {
+            position: relative;
+            overflow: hidden;
+        }
+        .achievement.bronze { background: linear-gradient(45deg, #CD7F32, #DBA76A); }
+        .achievement.silver { background: linear-gradient(45deg, #C0C0C0, #E8E8E8); }
+        .achievement.gold { background: linear-gradient(45deg, #FFD700, #FFF7CC); }
+        .achievement.rainbow {
+            background: linear-gradient(45deg, #ff0000, #ff7f00, #ffff00, #00ff00, #0000ff, #4b0082, #8f00ff);
+            animation: rainbow 5s linear infinite;
+        }
+        .achievement.locked {
+            background: #374151;
+            opacity: 0.5;
+        }
+        @keyframes rainbow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .achievement-notification {
+            z-index: 1000;
+            animation: slideUp 0.5s ease-out;
+        }
+        @keyframes slideUp {
+            from { transform: translateY(100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+    </style>
 </body>
 </html>
