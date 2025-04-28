@@ -439,6 +439,11 @@ function completeTask(taskId) {
         timerInterval = null;
         timerRemaining = 0;
         clearTimerState();
+
+        // Check for achievements after completing a task
+        if (window.Achievements) {
+            window.Achievements.check(userData);
+        }
     }
 }
 
@@ -604,6 +609,11 @@ function loadData() {
         restoreTasks();
         restoreLogs();
         restoreTimerState();
+        
+        // Check achievements after loading data
+        if (window.Achievements) {
+            window.Achievements.check(userData);
+        }
     } else {
         initializeTasks();
     }
@@ -754,6 +764,10 @@ function importData(event) {
 
 // Initialize application
 document.addEventListener('DOMContentLoaded', () => {
+    // Initialize achievements system
+    if (window.Achievements) {
+        window.Achievements.init();
+    }
     // Initialize DOM Elements
     profileBtn = document.getElementById('profileBtn');
     notificationBtn = document.getElementById('notificationBtn');
