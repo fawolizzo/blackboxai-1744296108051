@@ -185,22 +185,93 @@
         <div class="grid md:grid-cols-2 gap-8">
             <!-- Training Plan -->
             <div class="bg-white dark:bg-[#1E293B] rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm p-6 training-plan">
-                <h3 class="text-lg font-extrabold mb-4 flex items-center justify-between text-gray-900 dark:text-white">
-                    <div class="flex items-center">
-                        <i class="fas fa-tasks text-blue-600 dark:text-blue-400 mr-2"></i>
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-extrabold text-gray-900 dark:text-white flex items-center gap-2">
+                        <i class="fas fa-tasks text-blue-600 dark:text-blue-400"></i>
                         Today's Training Plan
+                    </h3>
+                    <div class="text-sm text-gray-600 dark:text-gray-400 flex items-center gap-2">
+                        <span>0/3 Complete</span>
+                        <div class="w-24 h-2 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden">
+                            <div class="h-full bg-blue-600 dark:bg-blue-400 rounded-full" style="width: 66%;"></div>
+                        </div>
                     </div>
-                    <div class="text-sm text-gray-600 dark:text-gray-400 daily-progress">0/3 Complete</div>
-                </h3>
-                <div class="space-y-4 tasks-container">
-                    <!-- Tasks will be added here -->
                 </div>
-                <div class="mt-4 space-y-2 buttons-container">
-                <button class="bg-gradient-to-r from-blue-500 to-blue-700 shadow-lg text-white px-5 py-3 rounded-xl hover:from-blue-600 hover:to-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-300 transition w-full flex items-center justify-center add-task-btn">
-                        <i class="fas fa-plus mr-2"></i>
-                        Add Task
+                <div class="grid grid-cols-3 gap-4 mb-4 text-center">
+                    <div class="bg-gray-50 dark:bg-[#273549] border border-gray-200 dark:border-gray-700 p-4 rounded-lg">
+                        <p class="text-2xl font-extrabold text-blue-600 dark:text-blue-400">1</p>
+                        <p class="text-gray-600 dark:text-gray-400">Active Tasks</p>
+                    </div>
+                    <div class="bg-gray-50 dark:bg-[#273549] border border-gray-200 dark:border-gray-700 p-4 rounded-lg">
+                        <p class="text-2xl font-extrabold text-emerald-600 dark:text-emerald-400">6</p>
+                        <p class="text-gray-600 dark:text-gray-400">Completed Tasks</p>
+                    </div>
+                    <div class="bg-gray-50 dark:bg-[#273549] border border-gray-200 dark:border-gray-700 p-4 rounded-lg">
+                        <p class="text-2xl font-extrabold text-purple-600 dark:text-purple-500">1h 17m</p>
+                        <p class="text-gray-600 dark:text-gray-400">Total Training Time</p>
+                    </div>
+                </div>
+                <div class="mb-4 p-4 bg-gray-50 dark:bg-[#273549] border border-gray-200 dark:border-gray-700 rounded-lg flex items-center justify-between">
+                    <div class="flex items-center gap-4">
+                        <div class="w-6 h-6 border-2 border-blue-600 rounded-full"></div>
+                        <div>
+                            <p class="text-blue-600 font-semibold text-lg">Active Task</p>
+                            <p class="text-gray-600 dark:text-gray-400">Play 3 mins games on chess.com (30m)</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <p class="text-blue-600 font-semibold text-lg">00:30</p>
+                        <button class="bg-yellow-400 text-yellow-900 px-3 py-1 rounded hover:bg-yellow-500 transition">Pause</button>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <div class="flex items-center justify-between mb-2">
+                        <h4 class="text-lg font-semibold text-gray-900 dark:text-white">Completed Tasks</h4>
+                        <button class="text-blue-600 dark:text-blue-400 hover:underline">Show All</button>
+                    </div>
+                    <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">Showing 3 of 6 completed tasks</p>
+                    <div class="space-y-2">
+                        <!-- Completed tasks list -->
+                        <div class="p-3 bg-gray-100 dark:bg-[#1E293B] border-l-4 border-emerald-500 rounded flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <div class="w-6 h-6 bg-emerald-500 rounded-full flex items-center justify-center text-white">
+                                    <i class="fas fa-check"></i>
+                                </div>
+                                <p class="line-through text-gray-600 dark:text-gray-400">Play 3 mins games on chess.com (30m)</p>
+                            </div>
+                            <p class="text-gray-600 dark:text-gray-400">00:00</p>
+                        </div>
+                        <div class="p-3 bg-gray-100 dark:bg-[#1E293B] border-l-4 border-emerald-500 rounded flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <div class="w-6 h-6 bg-emerald-500 rounded-full flex items-center justify-center text-white">
+                                    <i class="fas fa-check"></i>
+                                </div>
+                                <p class="line-through text-gray-600 dark:text-gray-400">Play through Jose Raul Capablanca Games (10m)</p>
+                            </div>
+                            <p class="text-gray-600 dark:text-gray-400">00:00</p>
+                        </div>
+                        <div class="p-3 bg-gray-100 dark:bg-[#1E293B] border-l-4 border-emerald-500 rounded flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <div class="w-6 h-6 bg-emerald-500 rounded-full flex items-center justify-center text-white">
+                                    <i class="fas fa-check"></i>
+                                </div>
+                                <p class="line-through text-gray-600 dark:text-gray-400">Play on chess.com (10m)</p>
+                            </div>
+                            <p class="text-gray-600 dark:text-gray-400">00:00</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex gap-4">
+                    <button class="w-full rounded-lg border border-blue-500 text-blue-500 p-4 flex items-center justify-center gap-2 bg-transparent hover:bg-blue-500/10 transition-all">
+                        <i class="fas fa-file-export"></i>Export Data
+                    </button>
+                    <button class="w-full rounded-lg border border-green-500 text-green-500 p-4 flex items-center justify-center gap-2 bg-transparent hover:bg-green-500/10 transition-all">
+                        <i class="fas fa-file-import"></i>Import Data
                     </button>
                 </div>
+                <button class="mt-4 w-full rounded-lg border border-red-500 text-red-500 p-4 flex items-center justify-center gap-2 bg-transparent hover:bg-red-500/10 transition-all">
+                    <i class="fas fa-sync-alt"></i>Reset Training Plan
+                </button>
             </div>
 
             <!-- Training Log -->
