@@ -804,12 +804,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Add buttons to the buttons container
     const buttonsContainer = document.querySelector('.buttons-container');
-    buttonsContainer.appendChild(exportBtn);
-    buttonsContainer.appendChild(importBtn);
-    buttonsContainer.appendChild(importInput);
+    if (buttonsContainer) {
+        buttonsContainer.appendChild(exportBtn);
+        buttonsContainer.appendChild(importBtn);
+        buttonsContainer.appendChild(importInput);
 
-    // Add Reset button after Add Task button
-    buttonsContainer.appendChild(resetBtn);
+        // Add Reset button after Add Task button
+        buttonsContainer.appendChild(resetBtn);
+    } else {
+        console.error('Buttons container not found in DOM.');
+    }
 
     // Initialize theme and event listeners
     initializeTheme();
