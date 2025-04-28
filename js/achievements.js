@@ -40,6 +40,9 @@ let userAchievements = {
     }
 };
 
+let shareTimeout = null;
+let pendingAchievements = [];
+
 // Check for achievements
 function checkAchievements(userData) {
     const newAchievements = [];
@@ -69,10 +72,22 @@ function checkAchievements(userData) {
         }
     });
 
-    // If new achievements were unlocked, show notifications
     if (newAchievements.length > 0) {
-        showAchievementNotifications(newAchievements);
-        saveAchievements();
+        // Add to pending achievements
+        pendingAchievements = pendingAchievements.concat(newAchievements);
+
+        // Clear existing timeout
+        if (shareTimeout) {
+            clearTimeout(shareTimeout);
+        }
+
+        // Set timeout to batch notifications and sharing (e.g., 1 hour)
+        shareTimeout = setTimeout(() => {
+            showAchievementNotifications(pendingAchievements);
+            // TODO: Implement share summary here
+            pendingAchievements = [];
+            saveAchievements();
+        }, 3600000); // 1 hour in milliseconds
     }
 }
 
