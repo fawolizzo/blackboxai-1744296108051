@@ -91,7 +91,6 @@ function checkAchievements(userData) {
     }
 }
 
-// Show achievement unlock notification
 function showAchievementNotifications(achievements) {
     achievements.forEach(achievement => {
         const notification = document.createElement('div');
@@ -99,13 +98,21 @@ function showAchievementNotifications(achievements) {
         notification.style.backgroundColor = ACHIEVEMENT_COLORS[achievement.color].bg;
         notification.style.color = ACHIEVEMENT_COLORS[achievement.color].text;
         
+        // Generate shareable URL (placeholder)
+        const shareUrl = generateShareUrl(achievement);
+        
         notification.innerHTML = `
-            <div class="flex items-center">
-                <i class="fas ${achievement.icon} text-2xl mr-3"></i>
-                <div>
-                    <h4 class="font-bold">${achievement.name}</h4>
-                    <p class="text-sm opacity-90">${achievement.description}</p>
+            <div class="flex items-center justify-between space-x-4">
+                <div class="flex items-center space-x-3">
+                    <i class="fas ${achievement.icon} text-2xl mr-3"></i>
+                    <div>
+                        <h4 class="font-bold">${achievement.name}</h4>
+                        <p class="text-sm opacity-90">${achievement.description}</p>
+                    </div>
                 </div>
+                <button class="bg-white text-black px-3 py-1 rounded hover:bg-gray-200 transition" onclick="window.open('${shareUrl}', '_blank')">
+                    Share
+                </button>
             </div>
         `;
         
@@ -118,6 +125,13 @@ function showAchievementNotifications(achievements) {
             setTimeout(() => notification.remove(), 500);
         }, 3000);
     });
+}
+
+// Generate a shareable URL for an achievement (placeholder implementation)
+function generateShareUrl(achievement) {
+    const baseUrl = 'https://twitter.com/intent/tweet';
+    const text = encodeURIComponent(`I just unlocked the "${achievement.name}" achievement on Chess Training Tracker! #ChessTraining #Achievements`);
+    return `${baseUrl}?text=${text}`;
 }
 
 // Save achievements to localStorage
