@@ -528,13 +528,17 @@ function restoreTasks() {
         paginationDiv.appendChild(infoSpan);
 
         const toggleButton = document.createElement('button');
-        toggleButton.className = 'text-blue-600 dark:text-blue-400 hover:underline';
+        toggleButton.className = 'text-blue-600 dark:text-blue-400 hover:underline focus:outline-none';
+        toggleButton.setAttribute('aria-expanded', completedTasksPage !== 1);
+        toggleButton.setAttribute('aria-controls', 'completed-tasks-list');
         toggleButton.textContent = completedTasksPage === 1 ? 'Show All' : 'Show Less';
         toggleButton.addEventListener('click', () => {
             if (completedTasksPage === 1) {
                 completedTasksPage = totalPages;
+                toggleButton.setAttribute('aria-expanded', 'true');
             } else {
                 completedTasksPage = 1;
+                toggleButton.setAttribute('aria-expanded', 'false');
             }
             restoreTasks();
         });
