@@ -1,5 +1,3 @@
-// Progress Chart Implementation using Chart.js
-
 let progressChart = null;
 
 function createProgressChart(ctx, data, type = 'bar') {
@@ -63,7 +61,6 @@ function createProgressChart(ctx, data, type = 'bar') {
     });
 }
 
-// Prepare data for last 7 days
 function prepareLast7DaysData(tasks) {
     const today = new Date();
     const labels = [];
@@ -83,14 +80,12 @@ function prepareLast7DaysData(tasks) {
     return { labels, values, label: 'Hours Trained' };
 }
 
-// Initialize and render the chart
 function renderProgressChart() {
-    const ctx = document.getElementById('progressChart').getContext('2d');
+    const ctx = document.getElementById('progressChartCanvas').getContext('2d');
     const data = prepareLast7DaysData(userData.tasks);
     createProgressChart(ctx, data, 'bar');
 }
 
-// Update chart when data changes
 document.addEventListener('taskUpdated', () => {
     if (typeof userData !== 'undefined') {
         renderProgressChart();
