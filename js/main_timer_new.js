@@ -422,6 +422,9 @@ function addTask(text, duration) {
     setupCheckboxListeners();
     updateDailyProgress();
     saveData();
+    
+    // Dispatch taskUpdated event for stats
+    document.dispatchEvent(new Event('taskUpdated'));
 }
 
 function completeTask(taskId) {
@@ -444,6 +447,9 @@ function completeTask(taskId) {
         if (window.Achievements) {
             window.Achievements.check(userData);
         }
+
+        // Dispatch taskUpdated event for stats
+        document.dispatchEvent(new Event('taskUpdated'));
     }
 }
 
