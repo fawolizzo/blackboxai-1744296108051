@@ -422,9 +422,6 @@ function addTask(text, duration) {
     setupCheckboxListeners();
     updateDailyProgress();
     saveData();
-    
-    // Dispatch taskUpdated event for stats
-    document.dispatchEvent(new Event('taskUpdated'));
 }
 
 function completeTask(taskId) {
@@ -447,112 +444,33 @@ function completeTask(taskId) {
         if (window.Achievements) {
             window.Achievements.check(userData);
         }
-
-        // Dispatch taskUpdated event for stats
-        document.dispatchEvent(new Event('taskUpdated'));
     }
 }
 
-const TASKS_PER_PAGE = 3;
-let completedTasksPage = 1;
-
 function restoreTasks() {
     tasksContainer.innerHTML = '';
-
-    // Find active task (task with timer running)
-    const activeTask = userData.tasks.find(task => !task.completed && task.id === activeTaskId);
-
-    // Separate completed and other active tasks
-    const otherActiveTasks = userData.tasks.filter(task => !task.completed && task.id !== activeTaskId);
-    const completedTasks = userData.tasks.filter(task => task.completed);
-
-    // Render active task first (if any)
-    if (activeTask) {
-        const taskDiv = document.createElement('div');
-        taskDiv.className = 'task-item flex items-center justify-between dark:text-white active-task';
-        taskDiv.innerHTML = `
-            <label class="task-label flex items-center flex-grow cursor-pointer">
-                <input type="checkbox" class="task-checkbox" data-duration="${activeTask.duration}" data-task-id="${activeTask.id}">
-                <span class="ml-3 dark:text-gray-300 font-semibold">${activeTask.text} (${formatDuration(activeTask.duration)})</span>
-            </label>
-            <div class="timer-controls flex items-center space-x-2 ml-4">
-                <span id="timer-${activeTask.id}" class="font-mono text-sm text-blue-600 dark:text-blue-400">00:00</span>
-                <button id="pause-btn-${activeTask.id}" class="pause-btn bg-yellow-500 text-yellow-900 px-3 py-1 rounded hover:bg-yellow-600 transition">Pause</button>
-            </div>
-        `;
-        tasksContainer.appendChild(taskDiv);
-    }
-
-    // Render other active tasks
-    otherActiveTasks.forEach(task => {
+    userData.tasks.forEach((task, index) => {
         const taskDiv = document.createElement('div');
         taskDiv.className = 'task-item flex items-center justify-between dark:text-white';
+        if (task.completed) {
+            taskDiv.classList.add('task-completed');
+        }
         taskDiv.innerHTML = `
             <label class="task-label flex items-center flex-grow cursor-pointer">
-                <input type="checkbox" class="task-checkbox" data-duration="${task.duration}" data-task-id="${task.id}">
+                <input type="checkbox" class="task-checkbox" data-duration="${task.duration}" data-task-id="${task.id}" ${task.completed ? 'checked' : ''}>
                 <span class="ml-3 dark:text-gray-300">${task.text} (${formatDuration(task.duration)})</span>
             </label>
             <div class="timer-controls flex items-center space-x-2 ml-4">
+                <span id="timer-${task.id}" class="font-mono text-sm text-blue-600 dark:text-blue-400">00:00</span>
+                ${task.completed ? '' : `
                 <button id="start-btn-${task.id}" class="start-btn bg-green-500 text-white px-2 py-1 rounded hover:bg-green-600" data-task-id="${task.id}">Start</button>
                 <button id="pause-btn-${task.id}" class="pause-btn bg-yellow-500 text-white px-2 py-1 rounded hover:bg-yellow-600 hidden" data-task-id="${task.id}">Pause</button>
                 <button id="resume-btn-${task.id}" class="resume-btn bg-blue-500 text-white px-2 py-1 rounded hover:bg-blue-600 hidden" data-task-id="${task.id}">Resume</button>
+                `}
             </div>
         `;
         tasksContainer.appendChild(taskDiv);
     });
-
-    // Pagination for completed tasks
-    const totalCompleted = completedTasks.length;
-    const totalPages = Math.ceil(totalCompleted / TASKS_PER_PAGE);
-    const startIndex = (completedTasksPage - 1) * TASKS_PER_PAGE;
-    const endIndex = startIndex + TASKS_PER_PAGE;
-    const paginatedCompleted = completedTasks.slice(startIndex, endIndex);
-
-    // Render paginated completed tasks
-    paginatedCompleted.forEach(task => {
-        const taskDiv = document.createElement('div');
-        taskDiv.className = 'task-item flex items-center justify-between dark:text-white task-completed';
-        taskDiv.innerHTML = `
-            <label class="task-label flex items-center flex-grow cursor-pointer">
-                <input type="checkbox" class="task-checkbox" data-duration="${task.duration}" data-task-id="${task.id}" checked>
-                <span class="ml-3 dark:text-gray-300 line-through">${task.text} (${formatDuration(task.duration)})</span>
-            </label>
-            <div class="timer-controls flex items-center space-x-2 ml-4">
-                <span id="timer-${task.id}" class="font-mono text-sm text-gray-600 dark:text-gray-400">00:00</span>
-            </div>
-        `;
-        tasksContainer.appendChild(taskDiv);
-    });
-
-    // Add pagination controls if needed
-    if (totalPages > 1) {
-        const paginationDiv = document.createElement('div');
-        paginationDiv.className = 'flex justify-between items-center mt-2 text-sm text-gray-600 dark:text-gray-400';
-
-        const infoSpan = document.createElement('span');
-        infoSpan.textContent = `Showing ${paginatedCompleted.length} of ${totalCompleted} completed tasks`;
-        paginationDiv.appendChild(infoSpan);
-
-        const toggleButton = document.createElement('button');
-        toggleButton.className = 'text-blue-600 dark:text-blue-400 hover:underline focus:outline-none';
-        toggleButton.setAttribute('aria-expanded', completedTasksPage !== 1);
-        toggleButton.setAttribute('aria-controls', 'completed-tasks-list');
-        toggleButton.textContent = completedTasksPage === 1 ? 'Show All' : 'Show Less';
-        toggleButton.addEventListener('click', () => {
-            if (completedTasksPage === 1) {
-                completedTasksPage = totalPages;
-                toggleButton.setAttribute('aria-expanded', 'true');
-            } else {
-                completedTasksPage = 1;
-                toggleButton.setAttribute('aria-expanded', 'false');
-            }
-            restoreTasks();
-        });
-        paginationDiv.appendChild(toggleButton);
-
-        tasksContainer.appendChild(paginationDiv);
-    }
-
     setupCheckboxListeners();
     updateDailyProgress();
 }
@@ -886,16 +804,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Add buttons to the buttons container
     const buttonsContainer = document.querySelector('.buttons-container');
-    if (buttonsContainer) {
-        buttonsContainer.appendChild(exportBtn);
-        buttonsContainer.appendChild(importBtn);
-        buttonsContainer.appendChild(importInput);
+    buttonsContainer.appendChild(exportBtn);
+    buttonsContainer.appendChild(importBtn);
+    buttonsContainer.appendChild(importInput);
 
-        // Add Reset button after Add Task button
-        buttonsContainer.appendChild(resetBtn);
-    } else {
-        console.error('Buttons container not found in DOM.');
-    }
+    // Add Reset button after Add Task button
+    buttonsContainer.appendChild(resetBtn);
 
     // Initialize theme and event listeners
     initializeTheme();
