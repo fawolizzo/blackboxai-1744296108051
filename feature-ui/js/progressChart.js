@@ -1,5 +1,9 @@
 let progressChart = null;
 
+const TIME_RANGES = [7, 30, 90];
+let currentRangeIndex = 0;
+let currentChartType = 'bar';
+
 function createProgressChart(ctx, data, type = 'bar') {
     if (progressChart) {
         progressChart.destroy();
@@ -12,8 +16,8 @@ function createProgressChart(ctx, data, type = 'bar') {
             datasets: [{
                 label: data.label,
                 data: data.values,
-                backgroundColor: 'rgba(59, 130, 246, 0.5)', // blue
-                borderColor: 'rgba(59, 130, 246, 1)',
+                backgroundColor: type === 'bar' ? 'rgba(59, 130, 246, 0.5)' : 'rgba(16, 185, 129, 0.5)',
+                borderColor: type === 'bar' ? 'rgba(59, 130, 246, 1)' : 'rgba(16, 185, 129, 1)',
                 borderWidth: 1,
                 fill: type === 'line' ? false : true,
                 tension: 0.1,
@@ -61,39 +65,77 @@ function createProgressChart(ctx, data, type = 'bar') {
     });
 }
 
-function prepareLast7DaysData(tasks) {
+function prepareData(tasks, range, type) {
     const today = new Date();
     const labels = [];
     const values = [];
 
-    for (let i = 6; i >= 0; i--) {
+    for (let i = range - 1; i >= 0; i--) {
         const date = new Date(today);
         date.setDate(today.getDate() - i);
         const dateStr = date.toISOString().split('T')[0];
         labels.push(date.toLocaleDateString('en-US', { weekday: 'short' }));
 
         const tasksForDay = tasks.filter(t => t.date === dateStr && t.completed);
-        const totalHours = tasksForDay.reduce((sum, t) => sum + t.duration, 0);
-        values.push(totalHours);
+        if (type === 'bar') {
+            const totalHours = tasksForDay.reduce((sum, t) => sum + t.duration, 0);
+            values.push(totalHours);
+        } else {
+            values.push(tasksForDay.length);
+        }
     }
 
-    return { labels, values, label: 'Hours Trained' };
+    return { labels, values, label: type === 'bar' ? 'Hours Trained' : 'Tasks Completed' };
 }
 
-function renderProgressChart() {
+function renderChart() {
     const ctx = document.getElementById('progressChartCanvas').getContext('2d');
-    const data = prepareLast7DaysData(userData.tasks);
-    createProgressChart(ctx, data, 'bar');
-}
+    const data = prepareData(userData.tasks, TIME_RANGES[currentRangeIndex], currentChartType);
+    createProgressChart(ctx, data, currentChartType);
 
-document.addEventListener('taskUpdated', () => {
-    if (typeof userData !== 'undefined') {
-        renderProgressChart();
-    }
-});
+    // Update summary stats
+    document.getElementById('currentStreak').textContent = `${userData.streak} days`;
+    const totalHours = userData.hoursTrained;
+    const hours = Math.floor(totalHours);
+    const minutes = Math.round((totalHours - hours) * 60);
+    document.getElementById('totalTrainingHours').textContent = `${hours}h ${minutes}m`;
+}
 
 document.addEventListener('DOMContentLoaded', () => {
-    if (typeof userData !== 'undefined') {
-        renderProgressChart();
-    }
+    renderChart();
+
+    document.getElementById('hoursBtn').addEventListener('click', () => {
+        currentChartType = 'bar';
+        renderChart();
+    });
+
+    document.getElementById('tasksBtn').addEventListener('click', () => {
+        currentChartType = 'line';
+        renderChart();
+    });
+
+    document.getElementById('prevRangeBtn').addEventListener('click', () => {
+        if (currentRangeIndex > 0) {
+            currentRangeIndex--;
+            renderChart();
+            updateTimeRangeLabel();
+        }
+    });
+
+    document.getElementById('nextRangeBtn').addEventListener('click', () => {
+        if (currentRangeIndex < TIME_RANGES.length - 1) {
+            currentRangeIndex++;
+            renderChart();
+            updateTimeRangeLabel();
+        }
+    });
+
+    updateTimeRangeLabel();
 });
+
+function updateTimeRangeLabel() {
+    const label = document.getElementById('timeRangeLabel');
+    if (!label) return;
+    const range = TIME_RANGES[currentRangeIndex];
+    label.textContent = `Last ${range} Days`;
+}
