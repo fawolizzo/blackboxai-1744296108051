@@ -64,6 +64,7 @@ let activeTaskId = null;
 let timerPaused = false;
 let timerEndTime = null;
 let loggedCompletion = false;
+let pauseRemainingMs = null;
 
 function startTick() {
     if (timerInterval) clearInterval(timerInterval);
@@ -79,119 +80,24 @@ function startTick() {
                 completeTask(activeTaskId);
                 clearInterval(timerInterval);
                 timerInterval = null;
+                clearTimerState();
             }
         }
     }, 1000);
 }
 
-function startTimer(taskId) {
-    if (timerInterval) clearInterval(timerInterval);
-    activeTaskId = taskId;
-    const task = userData.tasks.find(t => t.id === taskId);
-    if (!task) return;
-    timerPaused = false;
-    loggedCompletion = false;
-    timerEndTime = Date.now() + Math.floor(task.duration * 3600 * 1000);
-    updateTimerDisplayWithSeconds(taskId, Math.floor(task.duration * 3600));
-    updateTimerButtons(taskId);
-    saveTimerState();
-    startTick();
-}
+document.addEventListener('visibilitychange', () => {
+    if (activeTaskId === null) return;
 
-function pauseTimer() {
-    timerPaused = true;
-    updateTimerButtons(activeTaskId);
-    saveTimerState();
-    if (timerInterval) {
-        clearInterval(timerInterval);
-        timerInterval = null;
-    }
-}
-
-function resumeTimer() {
-    if (!timerPaused) return;
-    timerPaused = false;
-    updateTimerButtons(activeTaskId);
-    saveTimerState();
-    startTick();
-}
-
-function saveTimerState() {
-    if (activeTaskId !== null && timerEndTime !== null) {
-        localStorage.setItem(TIMER_ACTIVE_TASK_KEY, activeTaskId.toString());
-        localStorage.setItem('timerEndTime', timerEndTime.toString());
-        localStorage.setItem('timerPaused', timerPaused.toString());
-        localStorage.setItem('loggedCompletion', loggedCompletion.toString());
-    }
-}
-
-function clearTimerState() {
-    localStorage.removeItem(TIMER_ACTIVE_TASK_KEY);
-    localStorage.removeItem('timerEndTime');
-    localStorage.removeItem('timerPaused');
-    localStorage.removeItem('loggedCompletion');
-}
-
-function restoreTimerState() {
-    const savedTaskId = localStorage.getItem(TIMER_ACTIVE_TASK_KEY);
-    const savedEndTime = localStorage.getItem('timerEndTime');
-    const savedPaused = localStorage.getItem('timerPaused') === 'true';
-    const savedLogged = localStorage.getItem('loggedCompletion') === 'true';
-
-    if (savedTaskId && savedEndTime) {
-        activeTaskId = parseInt(savedTaskId);
-        timerEndTime = parseInt(savedEndTime);
-        timerPaused = savedPaused;
-        loggedCompletion = savedLogged;
-
+    if (document.hidden) {
+        if (timerInterval) {
+            clearInterval(timerInterval);
+            timerInterval = null;
+        }
+    } else {
         updateTimerDisplay(activeTaskId);
-        updateTimerButtons(activeTaskId);
-
-        if (!timerPaused && !loggedCompletion) {
+        if (!timerPaused && !timerInterval && !loggedCompletion) {
             startTick();
         }
     }
-}
-
-function updateTimerDisplay(taskId) {
-    const timerSpan = document.querySelector(`#timer-${taskId}`);
-    if (timerSpan) {
-        const now = Date.now();
-        let remainingMs = timerEndTime - now;
-        if (remainingMs < 0) remainingMs = 0;
-        const remainingSeconds = Math.floor(remainingMs / 1000);
-        timerSpan.textContent = formatTime(remainingSeconds);
-    }
-}
-
-function updateTimerDisplayWithSeconds(taskId, seconds) {
-    const timerSpan = document.querySelector(`#timer-${taskId}`);
-    if (timerSpan) {
-        timerSpan.textContent = formatTime(seconds);
-    }
-}
-
-function updateTimerButtons(taskId) {
-    userData.tasks.forEach(task => {
-        const startBtn = document.querySelector(`#start-btn-${task.id}`);
-        const pauseBtn = document.querySelector(`#pause-btn-${task.id}`);
-        const resumeBtn = document.querySelector(`#resume-btn-${task.id}`);
-        if (!startBtn || !pauseBtn || !resumeBtn) return;
-
-        if (task.id === taskId) {
-            if (timerPaused) {
-                startBtn.style.display = 'none';
-                pauseBtn.style.display = 'none';
-                resumeBtn.style.display = 'inline-block';
-            } else {
-                startBtn.style.display = 'none';
-                pauseBtn.style.display = 'inline-block';
-                resumeBtn.style.display = 'none';
-            }
-        } else {
-            startBtn.style.display = 'inline-block';
-            pauseBtn.style.display = 'none';
-            resumeBtn.style.display = 'none';
-        }
-    });
-}
+});
