@@ -56,8 +56,10 @@ let userData = {
     dailyProgress: []
 };
 
-// Timer state persistence keys
 const TIMER_ACTIVE_TASK_KEY = 'timerActiveTaskId';
+const TIMER_END_TIME_KEY = 'timerEndTime';
+const TIMER_PAUSED_KEY = 'timerPaused';
+const TIMER_PAUSE_REMAINING_KEY = 'pauseRemainingMs';
 
 let timerInterval = null;
 let activeTaskId = null;
@@ -65,6 +67,49 @@ let timerPaused = false;
 let timerEndTime = null;
 let loggedCompletion = false;
 let pauseRemainingMs = null;
+
+function saveTimerState() {
+    if (activeTaskId !== null) {
+        localStorage.setItem(TIMER_ACTIVE_TASK_KEY, activeTaskId.toString());
+    } else {
+        localStorage.removeItem(TIMER_ACTIVE_TASK_KEY);
+    }
+    if (timerEndTime !== null) {
+        localStorage.setItem(TIMER_END_TIME_KEY, timerEndTime.toString());
+    } else {
+        localStorage.removeItem(TIMER_END_TIME_KEY);
+    }
+    localStorage.setItem(TIMER_PAUSED_KEY, timerPaused ? 'true' : 'false');
+    if (pauseRemainingMs !== null) {
+        localStorage.setItem(TIMER_PAUSE_REMAINING_KEY, pauseRemainingMs.toString());
+    } else {
+        localStorage.removeItem(TIMER_PAUSE_REMAINING_KEY);
+    }
+}
+
+function loadTimerState() {
+    const storedTaskId = localStorage.getItem(TIMER_ACTIVE_TASK_KEY);
+    const storedEndTime = localStorage.getItem(TIMER_END_TIME_KEY);
+    const storedPaused = localStorage.getItem(TIMER_PAUSED_KEY);
+    const storedPauseRemaining = localStorage.getItem(TIMER_PAUSE_REMAINING_KEY);
+
+    activeTaskId = storedTaskId !== null ? parseInt(storedTaskId) : null;
+    timerEndTime = storedEndTime !== null ? parseInt(storedEndTime) : null;
+    timerPaused = storedPaused === 'true';
+    pauseRemainingMs = storedPauseRemaining !== null ? parseInt(storedPauseRemaining) : null;
+}
+
+function clearTimerState() {
+    localStorage.removeItem(TIMER_ACTIVE_TASK_KEY);
+    localStorage.removeItem(TIMER_END_TIME_KEY);
+    localStorage.removeItem(TIMER_PAUSED_KEY);
+    localStorage.removeItem(TIMER_PAUSE_REMAINING_KEY);
+    activeTaskId = null;
+    timerEndTime = null;
+    timerPaused = false;
+    pauseRemainingMs = null;
+    loggedCompletion = false;
+}
 
 function startTick() {
     if (timerInterval) clearInterval(timerInterval);
