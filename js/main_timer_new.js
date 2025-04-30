@@ -101,39 +101,40 @@ function setupCheckboxListeners() {
 let timerInterval = null;
 let activeTaskId = null;
 let timerPaused = false;
-let timerStartTime = null;
 let timerEndTime = null;
+let loggedCompletion = false;
 
-// Handle page visibility to avoid throttling issues
+function startTick() {
+    if (timerInterval) clearInterval(timerInterval);
+    timerInterval = setInterval(() => {
+        if (!timerPaused && timerEndTime) {
+            const now = Date.now();
+            let remainingMs = timerEndTime - now;
+            if (remainingMs < 0) remainingMs = 0;
+            const remainingSeconds = Math.floor(remainingMs / 1000);
+            updateTimerDisplayWithSeconds(activeTaskId, remainingSeconds);
+            if (remainingSeconds === 0 && !loggedCompletion) {
+                loggedCompletion = true;
+                completeTask(activeTaskId);
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+        }
+    }, 1000);
+}
+
 document.addEventListener('visibilitychange', () => {
     if (activeTaskId === null) return;
 
     if (document.hidden) {
-        // Page is hidden, clear interval to avoid throttling
         if (timerInterval) {
             clearInterval(timerInterval);
             timerInterval = null;
         }
     } else {
-        // Page is visible, update timer display immediately and restart interval if not paused
         updateTimerDisplay(activeTaskId);
-        if (!timerPaused && !timerInterval) {
-            timerInterval = setInterval(() => {
-                if (!timerPaused) {
-                    const now = Date.now();
-                    let remainingMs = timerEndTime - now;
-                    if (remainingMs < 0) remainingMs = 0;
-                    const remainingSeconds = Math.floor(remainingMs / 1000);
-                    updateTimerDisplayWithSeconds(activeTaskId, remainingSeconds);
-                    saveTimerState();
-                    if (remainingSeconds <= 0) {
-                        clearInterval(timerInterval);
-                        completeTask(activeTaskId);
-                        updateTimerButtons(null);
-                        clearTimerState();
-                    }
-                }
-            }, 1000);
+        if (!timerPaused && !timerInterval && !loggedCompletion) {
+            startTick();
         }
     }
 });
@@ -239,39 +240,17 @@ function updateDailyProgress() {
 
 // Timer functions
 function startTimer(taskId) {
-    if (timerInterval) {
-        clearInterval(timerInterval);
-    }
+    if (timerInterval) clearInterval(timerInterval);
     activeTaskId = taskId;
     const task = userData.tasks.find(t => t.id === taskId);
-    const durationInSeconds = Math.floor(task.duration * 3600);
+    if (!task) return;
     timerPaused = false;
-    timerStartTime = Date.now();
-    timerEndTime = timerStartTime + (durationInSeconds * 1000);
-    
-    // Show initial time
-    updateTimerDisplayWithSeconds(taskId, durationInSeconds);
+    loggedCompletion = false;
+    timerEndTime = Date.now() + Math.floor(task.duration * 3600 * 1000);
+    updateTimerDisplayWithSeconds(taskId, Math.floor(task.duration * 3600));
     updateTimerButtons(taskId);
     saveTimerState();
-    
-    timerInterval = setInterval(() => {
-        if (!timerPaused) {
-            const now = Date.now();
-            const elapsed = now - timerStartTime;
-            const remaining = durationInSeconds - Math.floor(elapsed / 1000);
-            
-            if (remaining <= 0) {
-                updateTimerDisplayWithSeconds(taskId, 0);
-                clearInterval(timerInterval);
-                completeTask(taskId);
-                updateTimerButtons(null);
-                clearTimerState();
-            } else {
-                updateTimerDisplayWithSeconds(taskId, remaining);
-                saveTimerState();
-            }
-        }
-    }, 1000);
+    startTick();
 }
 
 function pauseTimer() {
@@ -332,61 +311,39 @@ function updateTimerButtons(taskId) {
 }
 
 function saveTimerState() {
-    if (activeTaskId !== null) {
+    if (activeTaskId !== null && timerEndTime !== null) {
         localStorage.setItem(TIMER_ACTIVE_TASK_KEY, activeTaskId.toString());
-        localStorage.setItem('timerStartTime', timerStartTime.toString());
         localStorage.setItem('timerEndTime', timerEndTime.toString());
         localStorage.setItem('timerPaused', timerPaused.toString());
-        if (timerPaused) {
-            localStorage.setItem('timerPauseTime', timerPauseTime.toString());
-        } else {
-            localStorage.removeItem('timerPauseTime');
-        }
+        localStorage.setItem('loggedCompletion', loggedCompletion.toString());
     }
 }
 
+
 function clearTimerState() {
     localStorage.removeItem(TIMER_ACTIVE_TASK_KEY);
-    localStorage.removeItem('timerStartTime');
     localStorage.removeItem('timerEndTime');
     localStorage.removeItem('timerPaused');
-    localStorage.removeItem('timerPauseTime');
+    localStorage.removeItem('loggedCompletion');
 }
 
 function restoreTimerState() {
     const savedTaskId = localStorage.getItem(TIMER_ACTIVE_TASK_KEY);
-    const savedStartTime = localStorage.getItem('timerStartTime');
     const savedEndTime = localStorage.getItem('timerEndTime');
     const savedPaused = localStorage.getItem('timerPaused') === 'true';
-    const savedPauseTime = localStorage.getItem('timerPauseTime');
+    const savedLogged = localStorage.getItem('loggedCompletion') === 'true';
 
-    if (savedTaskId && savedStartTime && savedEndTime) {
+    if (savedTaskId && savedEndTime) {
         activeTaskId = parseInt(savedTaskId);
-        timerStartTime = parseInt(savedStartTime);
         timerEndTime = parseInt(savedEndTime);
         timerPaused = savedPaused;
-        timerPauseTime = savedPauseTime ? parseInt(savedPauseTime) : null;
+        loggedCompletion = savedLogged;
 
         updateTimerDisplay(activeTaskId);
         updateTimerButtons(activeTaskId);
 
-        if (!timerPaused) {
-            timerInterval = setInterval(() => {
-                if (!timerPaused) {
-                    const now = Date.now();
-                    let remainingMs = timerEndTime - now;
-                    if (remainingMs < 0) remainingMs = 0;
-                    const remainingSeconds = Math.floor(remainingMs / 1000);
-                    updateTimerDisplayWithSeconds(activeTaskId, remainingSeconds);
-                    saveTimerState();
-                    if (remainingSeconds <= 0) {
-                        clearInterval(timerInterval);
-                        completeTask(activeTaskId);
-                        updateTimerButtons(null);
-                        clearTimerState();
-                    }
-                }
-            }, 1000);
+        if (!timerPaused && !loggedCompletion) {
+            startTick();
         }
     }
 }
