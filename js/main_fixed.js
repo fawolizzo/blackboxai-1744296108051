@@ -381,7 +381,7 @@ function loadData() {
         // Restore tasks with their completed state
         restoreTasks();
         
-        // Restore logs
+        // Restore logs with dates
         restoreLogs();
     } else {
         initializeTasks();
@@ -408,87 +408,4 @@ function restoreTasks() {
     setupCheckboxListeners();
     updateDailyProgress();
 }
-
-// Function to restore logs
-function restoreLogs() {
-    logsContainer.innerHTML = '';
-    userData.logs.forEach(log => {
-        const logDiv = document.createElement('div');
-        logDiv.className = 'border-l-4 border-green-500 pl-4 p-3 hover:bg-gray-50 rounded-lg transition';
-        logDiv.innerHTML = `
-            <p class="text-sm text-gray-600">${log.timestamp}</p>
-            <p>${log.text}</p>
-        `;
-        logsContainer.appendChild(logDiv);
-    });
-}
-
-// Update UI with current data
-function updateUI() {
-    // Update profile section
-    document.querySelector('h2').textContent = `Welcome, ${userData.name}!`;
-    document.querySelector('p').textContent = `Rating: ${userData.rating} • Goal: ${userData.goal}`;
-    
-    // Update statistics
-    document.querySelectorAll('.streak-count').forEach(el => el.textContent = userData.streak);
-    document.querySelector('.completion-rate').textContent = `${userData.completionRate}%`;
-    document.querySelectorAll('.hours-trained').forEach(el => el.textContent = formatDuration(userData.hoursTrained));
-}
-
-// Reset Training Plan
-resetBtn.addEventListener('click', () => {
-    if (confirm('Are you sure you want to reset your training plan? This will clear all tasks and logs.')) {
-        userData.tasks = [];
-        userData.logs = [];
-        userData.hoursTrained = 0;
-        userData.completionRate = 0;
-        userData.streak = 0;
-        userData.dailyProgress = [];
-        
-        // Clear tasks and logs containers
-        tasksContainer.innerHTML = '';
-        logsContainer.innerHTML = '';
-        
-        updateUI();
-        updateDailyProgress();
-        saveData();
-    }
-});
-
-// Event Listeners
-profileBtn.addEventListener('click', () => {
-    // Update name
-    const newName = prompt('Enter your name:', userData.name);
-    if (newName) {
-        userData.name = newName;
-    }
-
-    // Update rating
-    const newRating = prompt('Enter your current rating:', userData.rating);
-    if (newRating && !isNaN(newRating)) {
-        userData.rating = parseInt(newRating);
-    }
-
-    // Update goal
-    const newGoal = prompt('Enter your rating goal:', userData.goal);
-    if (newGoal && !isNaN(newGoal)) {
-        userData.goal = parseInt(newGoal);
-    }
-
-    // Update UI and save changes
-    if (newName || newRating || newGoal) {
-        updateUI();
-        saveData();
-    }
-});
-
-notificationBtn.addEventListener('click', () => {
-    alert('Daily Reminder: Complete your training tasks to maintain your streak!');
-});
-
-// Initialize the application
-document.addEventListener('DOMContentLoaded', () => {
-    loadData();
-    setupCheckboxListeners();
-    updateProgressChart();
-});
+</edit_file>
