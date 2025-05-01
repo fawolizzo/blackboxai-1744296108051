@@ -469,14 +469,24 @@ function restoreLogs() {
             // Calculate daily hours
             const dailyHours = calculateDailyHours(userData.tasks, date);
             
-            // Add date header with hours
+            // Create a container for this date's logs
+            const dateSection = document.createElement('div');
+            dateSection.className = 'mb-6';
+
+            // Add date header with hours and collapse button
             const dateHeader = document.createElement('div');
-            dateHeader.className = 'text-lg font-semibold text-blue-600 mb-4 mt-6 border-b pb-2 flex justify-between items-center';
+            dateHeader.className = 'text-lg font-semibold text-blue-600 mb-4 mt-6 border-b pb-2 flex justify-between items-center cursor-pointer hover:bg-gray-50 dark:hover:bg-slate-700 rounded transition-colors';
             dateHeader.innerHTML = `
-                <span>${date === new Date().toLocaleDateString() ? 'Today' : date}</span>
+                <div class="flex items-center">
+                    <i class="fas fa-chevron-down mr-2 text-sm text-gray-400 transition-transform"></i>
+                    <span>${date === new Date().toLocaleDateString() ? 'Today' : date}</span>
+                </div>
                 <span class="text-sm text-gray-600">Hours: ${formatDuration(dailyHours)}</span>
             `;
-            logsContainer.appendChild(dateHeader);
+
+            // Create container for logs
+            const logsWrapper = document.createElement('div');
+            logsWrapper.className = 'space-y-2';
             
             // Add logs for this date
             logsByDate[date].forEach(log => {
@@ -486,8 +496,24 @@ function restoreLogs() {
                     <p class="text-sm text-gray-600">${log.time || new Date(log.timestamp).toLocaleTimeString()}</p>
                     <p>${log.text}</p>
                 `;
-                logsContainer.appendChild(logDiv);
+                logsWrapper.appendChild(logDiv);
             });
+
+            // Add click handler for collapsing
+            dateHeader.addEventListener('click', () => {
+                const icon = dateHeader.querySelector('i');
+                if (logsWrapper.style.display === 'none') {
+                    logsWrapper.style.display = 'block';
+                    icon.style.transform = 'rotate(0deg)';
+                } else {
+                    logsWrapper.style.display = 'none';
+                    icon.style.transform = 'rotate(-90deg)';
+                }
+            });
+
+            dateSection.appendChild(dateHeader);
+            dateSection.appendChild(logsWrapper);
+            logsContainer.appendChild(dateSection);
         });
 }
 
