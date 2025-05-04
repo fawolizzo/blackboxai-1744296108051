@@ -198,27 +198,17 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function pauseTimer(taskElement) {
-  if (!taskElement || taskElement.classList.contains('completed') || !taskElement.classList.contains('running')) return;
+    if (!taskElement || taskElement.classList.contains('completed') || !taskElement.classList.contains('running')) return;
 
-  // Clear the running interval
-  const intervalId = taskElement.getAttribute('data-interval-id');
-  if (intervalId) clearInterval(parseInt(intervalId, 10));
+    const intervalId = taskElement.getAttribute('data-interval-id');
+    if (intervalId) clearInterval(parseInt(intervalId, 10));
 
-  // Safely capture what’s remaining on screen
-  const timeText = taskElement.querySelector('.timer')?.textContent || '00:00';
-  const [m, s] = timeText.split(':').map(Number);
-  const remaining = m * 60 + s;
-  taskElement.setAttribute('data-remaining', remaining);
+    taskElement.classList.remove('running');
+    taskElement.querySelector('.start-btn').style.display = 'inline-block';
+    taskElement.querySelector('.pause-btn').style.display = 'none';
+    taskElement.querySelector('.task-checkbox').disabled = false;
 
-  // Show/hide buttons (no class changes)
-  taskElement.querySelector('.start-btn').style.display = 'inline-block';
-  taskElement.querySelector('.pause-btn').style.display = 'none';
-  taskElement.removeAttribute('data-interval-id');
-
-  // Enable checkbox again (optional)
-  taskElement.querySelector('.task-checkbox').disabled = false;
-
-  saveAppState();
+    saveAppState();
   }
 
   function completeTask(taskElement) {
