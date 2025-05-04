@@ -45,6 +45,7 @@ document.addEventListener('DOMContentLoaded', () => {
           remainingSeconds: remaining,
           completed: completed,
           isRunning: isRunning
+
           // Insert the console log here for debugging
             console.log("Saving Task:", { textContent, originalText });
         };
