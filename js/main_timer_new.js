@@ -198,24 +198,17 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   function pauseTimer(taskElement) {
-  if (!taskElement || taskElement.classList.contains('completed') || !taskElement.classList.contains('running')) return;
+    if (!taskElement || taskElement.classList.contains('completed') || !taskElement.classList.contains('running')) return;
 
-  const intervalId = taskElement.getAttribute('data-interval-id');
-  if (intervalId) clearInterval(parseInt(intervalId, 10));
+    const intervalId = taskElement.getAttribute('data-interval-id');
+    if (intervalId) clearInterval(parseInt(intervalId, 10));
 
-  taskElement.classList.remove('running');
-  taskElement.querySelector('.start-btn').style.display = 'inline-block';
-  taskElement.querySelector('.pause-btn').style.display = 'none';
-  taskElement.querySelector('.task-checkbox').disabled = false;
+    taskElement.classList.remove('running');
+    taskElement.querySelector('.start-btn').style.display = 'inline-block';
+    taskElement.querySelector('.pause-btn').style.display = 'none';
+    taskElement.querySelector('.task-checkbox').disabled = false;
 
-  // Ensure remaining time is preserved
-  const currentText = taskElement.querySelector('.timer').textContent;
-  const [m, s] = currentText.split(':').map(Number);
-  const remaining = m * 60 + s;
-  taskElement.setAttribute('data-remaining', remaining);
-
-  saveAppState();
-}
+    saveAppState();
   }
 
   function completeTask(taskElement) {
