@@ -39,9 +39,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const match = textContent.match(/^(.*) \(\d+m\)$/);
         const originalText = match ? match[1] : textContent;
 
-        // Insert the console log here for debugging
-            console.log("Saving Task:", { textContent, originalText });
-
         return {
           text: originalText,
           duration: duration,
